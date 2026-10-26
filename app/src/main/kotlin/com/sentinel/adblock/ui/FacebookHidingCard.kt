@@ -55,7 +55,7 @@ fun FacebookHidingCard(modifier: Modifier = Modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = if (enabled) "On in Accessibility settings" else "Off",
+                    text = if (enabled) "On in Accessibility settings" else "Off — tap to open the system switch",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

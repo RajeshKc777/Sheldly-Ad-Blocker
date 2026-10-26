@@ -33,12 +33,29 @@ object FacebookHiding {
             }
     }
 
-    /** Opens the system screen where the user can enable or disable the service. */
+    /** Opens the system screen where the user can enable or disable the service.
+     *
+     * Prefers the service's own details page (one switch, no hunting through the
+     * list of every accessibility service). That page is addressed by the
+     * platform-internal action string because the constant is not part of the
+     * public SDK; every fallback path still lands on a usable system screen.
+     */
     fun openSettings(context: Context) {
-        val intent = android.content.Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+        val component = android.content.ComponentName(context, FacebookAdHiderService::class.java)
+        val details = android.content.Intent(ACTION_ACCESSIBILITY_DETAILS_SETTINGS)
+            .putExtra(android.content.Intent.EXTRA_COMPONENT_NAME, component)
             .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-        runCatching { context.startActivity(intent) }
+        val opened = runCatching { context.startActivity(details) }.isSuccess
+        if (!opened) {
+            val fallback = android.content.Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            runCatching { context.startActivity(fallback) }
+        }
     }
+
+    /** `Settings.ACTION_ACCESSIBILITY_DETAILS_SETTINGS`, absent from the public SDK. */
+    private const val ACTION_ACCESSIBILITY_DETAILS_SETTINGS =
+        "android.settings.ACCESSIBILITY_DETAILS_SETTINGS"
 
     /** Reads the replaceable rule file from assets. Missing file => empty rules. */
     fun readRules(context: Context): SponsoredRules {
