@@ -76,9 +76,15 @@ Fragile by nature:
   as the foreground package is no longer Facebook, with a 3 s fallback for the
   case where node access is package-scoped. Before that watchdog existed, a cover
   was observed blocking the package installer; that is the bug it fixes.
-- **The cover colour follows the system theme**, not Facebook's in-app theme.
-  Light mode gets white, dark mode `#242526`; a phone in dark mode with Facebook
-  pinned to light (or the reverse) shows a block that does not match the feed.
+- **The cover colour is a user choice, not a guess.** Facebook has its own
+  light/dark switch, so a cover derived only from the system theme could sit as
+  a dark block in a light feed. Settings → *Cover colour* picks Match system,
+  Light, or Dark; the setting recolours covers already on screen.
+- **A translucent navigation bar can reveal the bottom strip of a covered post.**
+  On MIUI the accessibility tree reports the app window as ending above the real
+  display edge, so a cover placed on the reported rectangle stopped 66 px short
+  and Facebook content showed dimmed under the bar. Covers for posts that touch
+  the reported bottom edge are now extended to the real display height.
 - **False positives are possible.** A normal post whose header begins with a
   configured label and is short enough would be covered. The height and
   segmentation guards make this unlikely, not impossible.

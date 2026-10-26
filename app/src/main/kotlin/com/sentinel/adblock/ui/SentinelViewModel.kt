@@ -57,6 +57,11 @@ class SentinelViewModel(application: Application) : AndroidViewModel(application
         _message.value = "Upstream set to ${upstream.label}. Restart protection to apply."
     }
 
+    fun setCoverTheme(theme: SettingsRepository.CoverTheme) {
+        container.settings.setCoverTheme(theme)
+        _message.value = "Cover colour set to ${theme.label}."
+    }
+
     fun addAllow(raw: String) = addDomain(raw, allow = true)
 
     fun addDeny(raw: String) = addDomain(raw, allow = false)

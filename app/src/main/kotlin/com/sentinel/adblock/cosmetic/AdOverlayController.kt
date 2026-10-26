@@ -2,11 +2,11 @@ package com.sentinel.adblock.cosmetic
 
 import android.content.Context
 import android.content.res.Configuration
-import android.graphics.Color
 import android.graphics.PixelFormat
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
+import com.sentinel.adblock.storage.SettingsRepository
 import com.sentinel.core.cosmetic.Bounds
 import kotlin.math.max
 import kotlin.math.min
@@ -30,7 +30,10 @@ import kotlin.math.min
  * the positions once the feed settles. That trade-off is documented in
  * docs/LIMITATIONS.md.
  */
-class AdOverlayController(private val context: Context) {
+class AdOverlayController(
+    private val context: Context,
+    initialTheme: SettingsRepository.CoverTheme = SettingsRepository.CoverTheme.SYSTEM,
+) {
 
     private val windowManager =
         context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
@@ -38,14 +41,33 @@ class AdOverlayController(private val context: Context) {
     private val covers = ArrayList<View>()
     private var shown: List<Bounds> = emptyList()
 
-    private val coverColor: Int =
-        if ((context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
-            Configuration.UI_MODE_NIGHT_YES
-        ) {
-            Color.parseColor("#FF242526")
-        } else {
-            Color.parseColor("#FFFFFFFF")
+    private var theme: SettingsRepository.CoverTheme = initialTheme
+    private var coverColor: Int = colorFor(initialTheme)
+
+    /**
+     * Recolours covers in place when the user changes the cover setting.
+     *
+     * Facebook has its own theme switch, independent of the system theme, so a
+     * cover derived only from the system configuration can sit as a dark block
+     * in a light feed. The value is stored per user, not guessed per app.
+     */
+    fun setTheme(value: SettingsRepository.CoverTheme) {
+        if (value == theme) return
+        theme = value
+        coverColor = colorFor(value)
+        for (view in covers) view.setBackgroundColor(coverColor)
+    }
+
+    private fun colorFor(value: SettingsRepository.CoverTheme): Int {
+        val night =
+            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+                Configuration.UI_MODE_NIGHT_YES
+        return when (value) {
+            SettingsRepository.CoverTheme.LIGHT -> LIGHT_COVER
+            SettingsRepository.CoverTheme.DARK -> DARK_COVER
+            SettingsRepository.CoverTheme.SYSTEM -> if (night) DARK_COVER else LIGHT_COVER
         }
+    }
 
     fun render(rects: List<Bounds>) {
         if (rects == shown) return
@@ -130,5 +152,10 @@ class AdOverlayController(private val context: Context) {
             x = max(0, rect.left)
             y = top
         }
+    }
+
+    private companion object {
+        val LIGHT_COVER = 0xFFFFFFFF.toInt()
+        val DARK_COVER = 0xFF242526.toInt()
     }
 }

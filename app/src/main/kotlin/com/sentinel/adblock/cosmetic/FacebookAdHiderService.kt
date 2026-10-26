@@ -1,12 +1,15 @@
 package com.sentinel.adblock.cosmetic
 
 import android.accessibilityservice.AccessibilityService
+import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.os.SystemClock
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import com.sentinel.adblock.SentinelApplication
+import com.sentinel.adblock.storage.SettingsRepository
 import com.sentinel.core.cosmetic.SponsoredDetector
 import com.sentinel.core.cosmetic.SponsoredRules
 import java.util.concurrent.Executors
@@ -94,7 +97,7 @@ class FacebookAdHiderService : AccessibilityService() {
 
         val rules = FacebookHiding.readRules(this)
         detector = SponsoredDetector(rules)
-        overlays = AdOverlayController(this)
+        overlays = AdOverlayController(this, coverTheme())
 
         if (!rules.isUsable) {
             // No screen text is logged, only the fact that configuration failed.
@@ -178,6 +181,11 @@ class FacebookAdHiderService : AccessibilityService() {
         lastFacebookRootAt = lastScanAt
 
         val screenHeight = resources.displayMetrics.heightPixels
+        // The accessibility tree reports the app window as ending above the real
+        // display edge on some OEM builds (MIUI draws a translucent navigation
+        // bar over app content). Captured here so a matched post that touches
+        // that reported edge can be covered all the way down.
+        val rootBounds = Rect().also { root.getBoundsInScreen(it) }
         val scanGeneration = ++generation
 
         // Tree walking is the expensive part; keeping it off the main thread
@@ -199,8 +207,17 @@ class FacebookAdHiderService : AccessibilityService() {
                 for (match in matches) {
                     CosmeticStatistics.record(match.label, match.container)
                 }
+                val rects = matches.map { match ->
+                    val container = match.container
+                    if (container.bottom >= rootBounds.bottom - EDGE_TOLERANCE_PX) {
+                        container.copy(bottom = maxOf(container.bottom, screenHeight))
+                    } else {
+                        container
+                    }
+                }
                 val controller = overlays
-                controller?.render(matches.map { it.container })
+                controller?.setTheme(coverTheme())
+                controller?.render(rects)
                 if (controller?.hasCovers == true) {
                     handler.removeCallbacks(watchdog)
                     handler.postDelayed(watchdog, WATCHDOG_INTERVAL_MS)
@@ -208,6 +225,11 @@ class FacebookAdHiderService : AccessibilityService() {
             }
         }
     }
+
+    /** Cover colour chosen by the user; falls back to the system theme. */
+    private fun coverTheme(): SettingsRepository.CoverTheme =
+        (application as? SentinelApplication)?.container?.settings?.state?.value?.coverTheme
+            ?: SettingsRepository.CoverTheme.SYSTEM
 
     private fun isScreenOn(): Boolean {
         val power = getSystemService(PowerManager::class.java) ?: return true
@@ -227,5 +249,8 @@ class FacebookAdHiderService : AccessibilityService() {
         const val SLOW_SCAN_MS = 80L
         const val WATCHDOG_INTERVAL_MS = 500L
         const val NULL_ROOT_GRACE_MS = 3_000L
+
+        /** Slack for "this post touches the reported bottom edge of the window". */
+        const val EDGE_TOLERANCE_PX = 8
     }
 }

@@ -31,7 +31,27 @@ class SettingsRepository(context: Context) {
         val upstream: Upstream = Upstream.CLOUDFLARE,
         val allowlist: Set<String> = emptySet(),
         val denylist: Set<String> = emptySet(),
+        val coverTheme: CoverTheme = CoverTheme.SYSTEM,
     )
+
+    /**
+     * Colour of the Facebook post covers.
+     *
+     * Facebook's own theme is a per-app setting, so a cover that blindly follows
+     * the system theme can sit as a dark rectangle in a light feed (or the other
+     * way round). The user picks what matches their Facebook.
+     */
+    enum class CoverTheme(val label: String) {
+        SYSTEM("Match system"),
+        LIGHT("Light"),
+        DARK("Dark"),
+        ;
+
+        companion object {
+            fun fromKey(key: String?): CoverTheme =
+                entries.firstOrNull { it.name == key } ?: SYSTEM
+        }
+    }
 
     /**
      * Upstream resolvers are addressed by IP literal on purpose: resolving a
@@ -65,10 +85,16 @@ class SettingsRepository(context: Context) {
         _state.update { it.copy(denylist = domains.toSet()) }
     }
 
+    fun setCoverTheme(theme: CoverTheme) {
+        prefs.edit().putString(KEY_COVER_THEME, theme.name).apply()
+        _state.update { it.copy(coverTheme = theme) }
+    }
+
     private fun read(): Settings = Settings(
         upstream = Upstream.fromKey(prefs.getString(KEY_UPSTREAM, null)),
         allowlist = prefs.getStringSet(KEY_ALLOWLIST, null)?.toSet() ?: emptySet(),
         denylist = prefs.getStringSet(KEY_DENYLIST, null)?.toSet() ?: emptySet(),
+        coverTheme = CoverTheme.fromKey(prefs.getString(KEY_COVER_THEME, null)),
     )
 
     private companion object {
@@ -76,5 +102,6 @@ class SettingsRepository(context: Context) {
         const val KEY_UPSTREAM = "upstream"
         const val KEY_ALLOWLIST = "allowlist"
         const val KEY_DENYLIST = "denylist"
+        const val KEY_COVER_THEME = "cover_theme"
     }
 }
