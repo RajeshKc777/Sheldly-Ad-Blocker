@@ -45,3 +45,9 @@ max_joined_label_fraction=0.12
 # the whole feed from being treated as one post.
 min_container_fraction=0.15
 max_container_fraction=0.95
+
+# The button Facebook itself puts on an ad post. When it is present inside a
+# matched post, Shieldly presses it so Facebook removes the ad and the feed
+# closes the gap. No other control is ever pressed. Remove this line to never
+# press anything; ads are then left in place, and no overlay or block is drawn.
+hide_control=Hide Ad

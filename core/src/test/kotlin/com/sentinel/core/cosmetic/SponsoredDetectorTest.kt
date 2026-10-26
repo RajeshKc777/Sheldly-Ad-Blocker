@@ -256,4 +256,28 @@ class SponsoredDetectorTest {
         assertEquals(setOf("ad", "sponsored"), parsed.labels)
         assertEquals(0.06, parsed.maxLabelFraction, 0.0001)
     }
+
+    @Test
+    fun `hide control is parsed and compared after normalisation`() {
+        val parsed = SponsoredRules.parse(
+            """
+            label=Ad
+            hide_control=Hide Ad
+            """.trimIndent(),
+        )
+
+        assertTrue(parsed.isHideControl("Hide Ad"))
+        assertTrue(parsed.isHideControl("hide ad"))
+        assertTrue(parsed.isHideControl("Hide\u00A0\u00A0Ad"))
+        assertTrue(!parsed.isHideControl("Hide post"))
+        assertTrue(!parsed.isHideControl("More options"))
+    }
+
+    @Test
+    fun `rules without a hide control never press anything`() {
+        val parsed = SponsoredRules.parse("label=Ad")
+
+        assertTrue(parsed.hideControls.isEmpty())
+        assertTrue(!parsed.isHideControl("Hide Ad"))
+    }
 }

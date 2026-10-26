@@ -127,9 +127,10 @@ fun DashboardScreen(
                     )
                 }
                 Text(
-                    text = "Covers posts that Facebook labels as ads, in Facebook and " +
-                        "Facebook Lite. The post is still downloaded and rendered; only " +
-                        "the display is covered. Enable it in Settings.",
+                    text = "Presses Facebook's own Hide Ad button on posts that Facebook " +
+                        "labels as ads, so Facebook removes the post. Nothing is drawn over " +
+                        "the feed. Facebook Lite exposes no post text to accessibility. " +
+                        "Enable it in Settings.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 6.dp),

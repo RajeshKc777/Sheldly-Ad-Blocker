@@ -45,22 +45,32 @@ Key facts:
 
 | Method | Works? | Cost / risk | Verdict |
 |---|---|---|---|
-| Accessibility overlay cover | Yes for Katana | Covers are in screen space, so they must be re-drawn after scroll; ad stays loaded | **Chosen** |
+| Accessibility overlay cover | Yes for Katana | Covers are in screen space, must be re-drawn after scroll, and leave a visible block | **Rejected (removed 2026-10-26)** |
 | `ACTION_SCROLL_FORWARD` to skip the post | Probably | Moves the user's reading position; can trigger more feed loading; jarring on fast scroll | Rejected |
-| Auto-click Facebook's "Hide Ad" | Probably | Performs an action inside another app and reports a preference to Facebook; brittle | Rejected |
+| Auto-click Facebook's "Hide Ad" | Yes — it is a direct one-click button on the tested build | Performs an action inside another app and reports a preference to Facebook; brittle | **Chosen (2026-10-26)** |
 | Screenshot + OCR | Would work on Lite | Needs screen capture, processes post content, slow, battery-heavy | Rejected |
 | Modify Facebook's views | No | Not possible across processes | Rejected |
 
 ## Chosen method
 
+> **Update (2026-10-26).** The tested build exposes a direct, one-click
+> `Hide Ad` button in a sponsored post's header — it sits next to "More
+> options", is `clickable=true`, and opens no menu. The decision therefore
+> changed: the service presses that button, and nothing is drawn over the feed.
+> The press is a real action inside Facebook, so it is opt-in, disclosed, and
+> limited to one press per post; the label and control names stay in the
+> replaceable rules file. Covers were removed because they leave a visible
+> block, and the requirement is that the screen look untouched.
+
 - **Detection**: walk the accessibility tree, match the first segment of a
   short header label against a replaceable label list, then walk up to the
   nearest ancestor that is still one post, stopping at `RecyclerView`.
-- **Hiding**: draw an opaque `TYPE_ACCESSIBILITY_OVERLAY` window over that
-  rectangle. Non-focusable, touch-absorbing, removed when the service stops.
-- **Why**: it is local, reversible, sends nothing to Facebook, and does not
-  move the user's scroll position. The visible cost is that the covered post
-  becomes a blank block, and that covers must be cleared while the feed scrolls.
+- **Hiding**: press the `Hide Ad` button inside that post (Facebook removes the
+  post and reflows the feed). A post without that button is left alone — no
+  overlay, no blank block.
+- **Why**: the press leaves no trace and needs no scroll movement. The cost is a
+  brief first draw that no accessibility app can pre-empt, and a preference
+  signal sent to Facebook by its own control.
 
 ## Consequences accepted
 
@@ -71,9 +81,9 @@ Key facts:
 
 ## Open questions for a later phase
 
-- Does Facebook expose the label identically on tablets and in other locales?
-  Only one device and one locale were tested.
-- Would `TYPE_ACCESSIBILITY_OVERLAY` covers survive Facebook's own `FLAG_SECURE`
-  on future versions? Not applicable today.
+- Does Facebook expose the label and the `Hide Ad` control identically on
+  tablets and in other locales? Only one device and one locale were tested.
+- Could the first drawn frame be avoided entirely without root? No known
+  accessibility mechanism does that today.
 - Is there a stable view-id resource name for the header that would make
   detection cheaper than a full tree walk? Not exposed in the dump.

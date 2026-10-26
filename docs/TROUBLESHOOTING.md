@@ -40,7 +40,9 @@ reboot needed.
 |---|---|---|
 | Toggle does nothing / "Restricted setting" | Android 13+ blocks accessibility for sideloaded apps until allowed | Settings → Apps → Shieldly → ⋮ → **Allow restricted settings** |
 | Hider silently stops working | Facebook changed its label or layout | Nothing to fix at runtime; this is the documented fragility |
-| A covered post reappears during fast scrolling | A newly-entering ad can be visible until the next scan (~1 s worst case) | Inherent to the overlay technique |
+| An ad stays on screen for a moment before it vanishes | Android draws the post before the accessibility callback reaches Shieldly; the fast path presses `Hide Ad` as soon as the changed node is visible | Expected and bounded; no accessibility app can act before the first frame |
+| An ad is never removed | That build shows no `Hide Ad` button, or the control was renamed | Add the new control name as `hide_control=` in `assets/cosmetic/facebook_rules.txt` and rebuild |
+| The same advertiser appears again in a later session | Facebook can serve the same advertiser again; hiding a post is not a block | Nothing to fix — the service hides what is on screen |
 | Ads in Reels/Stories/Marketplace still show | Out of scope by design (labelled feed posts only) | See [LIMITATIONS.md](LIMITATIONS.md) |
 | MIUI kills the hider | Battery optimisation | Autostart **on**, battery saver **No restrictions** for Shieldly |
 

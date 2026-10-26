@@ -68,7 +68,7 @@
 | 🔎 **Rule checker** | ✅ Implemented | Type any domain and see exactly which rule would match it |
 | 🌐 **Upstream resolver choice** | ✅ Implemented | Cloudflare, Google, Quad9, AdGuard (plain UDP/53) |
 | 📊 **Live counters** | ✅ Implemented | Lookups, blocked, cache hits, IPv6 observations — all in memory |
-| 📱 **Facebook sponsored-post hider** | ✅ Experimental | Opt-in AccessibilityService that covers labelled ad posts in the Facebook feed |
+| 📱 **Facebook sponsored-post hider** | ✅ Experimental | Opt-in AccessibilityService that presses Facebook's own `Hide Ad` button on labelled ad posts, so Facebook removes them — nothing is drawn over the feed |
 | 🔄 **Auto-updating blocklists** | 🟡 Library ready, not wired in | HTTPS fetcher + validator exist and are unit-tested; no UI or schedule yet |
 | 🌍 IPv6 DNS filtering | ❌ Not implemented | IPv6 packets are counted, not filtered |
 | 🔐 HTTPS inspection | ❌ Not implemented | Deliberately — see [TLS section](#-http-https-and-tls-explained) |
@@ -76,7 +76,7 @@
 
 ## 📈 Project status
 
-- **Implemented and verified:** local VPN DNS filter, domain matcher with allow-first precedence, TTL-aware cache, upstream forwarding with SERVFAIL fail-open, Compose UI (dashboard / rules / stats / settings), experimental Facebook sponsored-post hider with an external watchdog.
+- **Implemented and verified:** local VPN DNS filter, domain matcher with allow-first precedence, TTL-aware cache, upstream forwarding with SERVFAIL fail-open, Compose UI (dashboard / rules / stats / settings), experimental Facebook sponsored-post hider (direct `Hide Ad` press, no overlay).
 - **Library code, not wired into the app yet:** HTTPS blocklist downloader + validator (`core/…/blocklists/BlocklistUpdater.kt`). The app currently uses only its **bundled starter list (49 rules)**.
 - **Not implemented:** IPv6 filtering, DoH/DoT interception, HTTPS content inspection, browser packaging, release signing, Play Store publishing.
 - **Verified on hardware:** Xiaomi Redmi Note 8 Pro (Android 11, MIUI). Emulator coverage: API 36.
@@ -313,7 +313,7 @@ Every step's counters are shown on the **Stats** tab. A blocked lookup is a DNS 
 
 ## 🧭 Browser-level filtering
 
-**Not implemented.** There is no bundled browser. The original requirement's Phase 8 ("browser with content filtering") was never started, and nothing in the README pretends otherwise. The experimental **Facebook sponsored-post hider** is the closest implemented feature: an AccessibilityService that covers posts Facebook itself labels as ads, scoped to `com.facebook.katana` and `com.facebook.lite` only, off by default, and documented with its limits in [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md).
+**Not implemented.** There is no bundled browser. The original requirement's Phase 8 ("browser with content filtering") was never started, and nothing in the README pretends otherwise. The experimental **Facebook sponsored-post hider** is the closest implemented feature: an AccessibilityService that hides posts Facebook itself labels as ads by pressing Facebook's own `Hide Ad` button, which makes Facebook remove the post — scoped to `com.facebook.katana` and `com.facebook.lite` only, off by default, and documented with its limits in [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md).
 
 ## 🛡️ Privacy and security
 
@@ -342,7 +342,7 @@ The short list; the long list with evidence lives in [`docs/LIMITATIONS.md`](doc
 | IPv6 DNS | Counted, not filtered |
 | QUIC / HTTP-3 | Not DNS; never touches the tunnel |
 | Ad-URL style blocking (`/ad.png` on a shared CDN) | Not possible without content inspection |
-| YouTube, Instagram, Facebook Lite, Reels/video ads | Not removed by DNS; the hider covers only labelled feed posts in the main Facebook app — Facebook Lite exposes no text to accessibility, so nothing can be detected there |
+| YouTube, Instagram, Facebook Lite, Reels/video ads | Not removed by DNS; the hider only handles labelled feed posts in the main Facebook app — Facebook Lite exposes no text to accessibility, so nothing can be detected there |
 | Banking/sensitive apps | Should work normally (only DNS names are seen) — if one misbehaves, add an allow rule |
 | Two VPN apps | Android allows one at a time; enabling another **revokes** Shieldly's tunnel |
 | Play Store policy | Accessibility-based UI modification is high-risk; this build is **not** published on Play |

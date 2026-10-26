@@ -64,10 +64,11 @@ Releases page. → [GETTING_STARTED.md](GETTING_STARTED.md)
 ## Facebook hider: is my screen content logged?
 
 No. The service reads the accessibility tree to find posts Facebook itself
-labels as ads and draws an opaque cover over them. Screen text is never logged,
-stored, or transmitted; the only persisted number is "how many posts were
-hidden". It is off by default and scoped to the two Facebook apps. →
-[LIMITATIONS.md](LIMITATIONS.md)
+labels as ads, then presses Facebook's own `Hide Ad` button so Facebook removes
+the post. Nothing is drawn over the feed. If that button is missing, the post is
+left alone. Screen text is never logged, stored, or transmitted; the only
+persisted number is "how many posts were hidden". It is off by default and
+scoped to the two Facebook apps. → [LIMITATIONS.md](LIMITATIONS.md)
 
 ## If something breaks, how do I get the internet back instantly?
 

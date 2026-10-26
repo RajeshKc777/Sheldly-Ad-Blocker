@@ -81,7 +81,7 @@ is removed.
 | **Domain filtering** | The name an app looks up | ✅ This is the entire product |
 | Request filtering | Full URLs inside a decrypted proxy stream | ❌ |
 | TLS inspection | All HTTPS content via a trusted certificate | ❌ (refused — see [SECURITY.md](SECURITY.md)) |
-| Cosmetic filtering | Page/UI structure (e.g. an ad *labelled* in the DOM) | ❌ in general; the experimental **Facebook hider** is a scoped cousin — it covers posts Facebook labels as ads, in the Facebook feed only |
+| Cosmetic filtering | Page/UI structure (e.g. an ad *labelled* in the DOM) | ❌ in general; the experimental **Facebook hider** is a scoped cousin — it hides posts Facebook labels as ads by pressing Facebook's own `Hide Ad` button, in the Facebook feed only |
 
 DNS filtering therefore cannot remove an ad that lives on the same domain as the
 content you asked for, and cannot inspect HTTPS URLs. That is the honest boundary

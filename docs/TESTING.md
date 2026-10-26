@@ -103,14 +103,12 @@ results were measured over adb:
 | Check | Evidence |
 |---|---|
 | The ad label is found on a live feed | `Ad•Shared with: Public` at `[165,353][270,392]` inside a post spanning `[0,257][1080,2134]` |
-| The whole post is covered | Overlay window `mAttrs={(0,257)(1080x1877) … ty=2032}`, i.e. exactly the post rectangle |
+| Facebook exposes its own hide control | Live dump of a sponsored post: `content-desc="Hide Ad"`, class `Button`, `[965,560][1080,675]`, `clickable=true`, next to `More options for MDPI's post` |
+| Pressing it removes the post | Earlier overlay build covered post `(0,560)-(1080,2134)` exactly; the press build removes the same post and the feed closes the gap, leaving no window and no block |
 | The counter increments | Shieldly dashboard showed **"Ads hidden on screen 3"** after three distinct posts |
-| Covers are removed when leaving Facebook | After `am start` of Shieldly and a 2 s wait, no `ty=2032` window with our geometry remained |
-| The cover no longer reads as a badge | Cover is a plain `View`, background `#FFFFFF` in light mode and `#242526` in dark mode |
-| A stale cover could block another app | Observed once on the **previous** build: a cover at `(0,633)(1080x1079)` sat over the package installer's INSTALL/CANCEL buttons. Fixed by the watchdog; re-tested after the fix. |
 
-Live scroll tracking has not been measured frame by frame; it is covered by the
-manual steps below.
+Frame-level timing of the first draw is not measured; it is bounded by the
+accessibility callback plus the fast-path walk, and described in LIMITATIONS.md.
 
 ## Manual procedure — Phase 8b on a physical device
 
@@ -120,26 +118,27 @@ manual steps below.
 3. Read the disclosure, tap **Open Accessibility settings**.
 4. Enable **Shieldly sponsored-post hider**. Accept the system warning.
 5. Open Facebook, scroll until a post shows the `Ad` label.
-   Expected: the post is replaced by a blank block matching the feed background.
+   Expected: the post **disappears** and the feed closes the gap — Shieldly
+   presses the `Hide Ad` button Facebook renders in the post header, so Facebook
+   itself removes the post. No block, border or overlay remains.
 6. Return to Shieldly → **Dashboard**. Expected: "Ads hidden on screen"
    increments once per distinct post.
-7. Scroll the feed slowly while a covered post is on screen. Expected: the cover
-   moves with the post and the ad is not revealed. During a fast fling a
-   newly-entering ad can be visible until the next scan (about a second).
-8. Open another app (or the home screen) while a cover is showing. Expected:
-   the cover disappears within ~0.5 s and never sits over another app.
-9. Turn the service off in Accessibility settings. Expected: covers disappear
-   immediately (service destroyed) and the counter resets on the next enable.
+7. Scroll the feed slowly past several ads. Expected: each ad disappears when it
+   enters the feed; during a fast fling a newly-entering ad can be visible for a
+   fraction of a second before the fast path reaches it.
+8. Open another app (or the home screen) while scrolling. Expected: nothing from
+   Shieldly is visible over any other app — the service draws no windows at all.
+9. Turn the service off in Accessibility settings. Expected: no further presses,
+   and the counter resets on the next enable.
 
 Verification without looking at the screen:
 
 ```
-adb shell dumpsys window windows | findstr /i "AccessibilityOverlay sentinel"
 adb shell dumpsys accessibility | findstr /i "sentinel"
+adb shell dumpsys window windows | findstr /i "AccessibilityOverlay"
 ```
 
-Overlay windows appear as `TYPE_ACCESSIBILITY_OVERLAY` owned by
-`com.sentinel.adblock`.
+The second command must return **nothing**: this build adds no overlay window.
 
 ## Manual procedure — DNS layer
 
@@ -152,7 +151,7 @@ Unchanged from Phase 6:
 
 ## Known gaps in test coverage
 
-- No instrumented (`androidTest`) tests. The overlay controller and the
+- No instrumented (`androidTest`) tests. The service and the
   AccessibilityNodeInfo → UiNode adapter are only exercised by hand.
 - No test for Facebook Lite, because its tree exposes no text to assert on.
 - Battery impact of repeated tree walks is measured by hand, not automated.

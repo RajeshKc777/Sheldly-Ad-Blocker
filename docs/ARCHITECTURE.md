@@ -22,9 +22,8 @@ Sheldly-Ad-Blocker/
 │       │   ├── VpnController.kt      # consent intent + start/stop intents
 │       │   └── AdBlockVpnService.kt  # the tunnel: TUN reader, packet I/O
 │       ├── cosmetic/                 # experimental Facebook sponsored-post hider
-│       │   ├── FacebookAdHiderService.kt  # AccessibilityService
-│       │   ├── AdOverlayController.kt     # overlay windows (covers)
-│       │   ├── AccessibilityTreeReader.kt # AccessibilityNodeInfo → UiNode
+│       │   ├── FacebookAdHiderService.kt  # AccessibilityService (presses Hide Ad)
+│       │   ├── AccessibilityTreeReader.kt # AccessibilityNodeInfo → UiNode + Hide Ad handles
 │       │   └── CosmeticStatistics.kt      # session counter
 │       └── ui/                       # Compose screens + theme
 └── core/                         # pure Kotlin JVM module (no Android SDK)
@@ -57,7 +56,7 @@ flowchart LR
         BL["Blocklists<br/>(asset loader + engine handle)"]
         SET["SettingsRepository<br/>(SharedPreferences)"]
         PS["ProtectionState<br/>(StateFlow, process-wide)"]
-        COS["cosmetic/<br/>AccessibilityService + overlays"]
+        COS["cosmetic/<br/>AccessibilityService (Hide Ad press)"]
     end
 
     subgraph CORE[":core (pure Kotlin)"]

@@ -60,8 +60,10 @@ fun FacebookHidingCard(modifier: Modifier = Modifier) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = "Covers posts Facebook labels as ads. Experimental: it breaks " +
-                        "when Facebook changes its layout.",
+                    text = "Hides posts Facebook labels as ads by pressing Facebook's own " +
+                        "Hide Ad button: Facebook removes the post, so nothing is drawn " +
+                        "over the feed. Experimental: it breaks when Facebook changes its " +
+                        "layout.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 2.dp),
@@ -98,10 +100,11 @@ fun FacebookHidingCard(modifier: Modifier = Modifier) {
         }
 
         Text(
-            text = "The ad is still downloaded and rendered by Facebook; only the " +
-                "display is covered. Android requires you to confirm this in system " +
-                "settings, so the switch opens Accessibility settings rather than " +
-                "turning anything on itself.",
+            text = "Shieldly presses Facebook's own Hide Ad button: Facebook removes the " +
+                "post and closes the gap in the feed, so no block or overlay is drawn " +
+                "over it. An ad that offers no such button is left alone rather than " +
+                "covered. Android requires you to confirm this in system settings, so the " +
+                "switch opens Accessibility settings rather than turning anything on itself.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 8.dp),
@@ -139,14 +142,17 @@ private fun DisclosureDialog(onDismiss: () -> Unit, onOpenSettings: () -> Unit) 
                 )
                 Bullet(
                     "What it does",
-                    "Looks for the small ad label in a post header and covers that post " +
-                        "with an opaque rectangle. It counts how many posts it covered.",
+                    "Looks for the small ad label in a post header. If Facebook shows its " +
+                        "own Hide Ad button on that post, it presses it, and Facebook removes " +
+                        "the post and reflows the feed. If that button is absent, the post " +
+                        "is left alone. It counts how many posts it handled.",
                 )
                 Bullet(
                     "What it never does",
                     "It does not store, log, or send screen text. It has no network " +
-                        "access, takes no screenshots, and never taps or scrolls Facebook " +
-                        "for you.",
+                        "access and takes no screenshots. It never scrolls, opens, likes, " +
+                        "or navigates: the only tap it performs is on the Hide Ad button " +
+                        "Facebook itself shows on an ad post, once per post.",
                 )
                 Bullet(
                     "What can go wrong",

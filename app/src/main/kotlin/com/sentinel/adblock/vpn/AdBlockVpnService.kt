@@ -206,6 +206,12 @@ class AdBlockVpnService : VpnService() {
         ).apply {
             description = getString(R.string.notif_channel_description)
             setShowBadge(false)
+            // Android requires a VPN service to stay in the foreground, so a
+            // notification cannot be removed. It can be silent: no sound, no
+            // vibration, no badge, no heads-up.
+            setSound(null, null)
+            enableVibration(false)
+            enableLights(false)
         }
         manager.createNotificationChannel(channel)
     }
@@ -225,6 +231,7 @@ class AdBlockVpnService : VpnService() {
             .setShowWhen(false)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setSilent(true)
             .setContentIntent(contentIntent)
             .build()
     }

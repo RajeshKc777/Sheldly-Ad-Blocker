@@ -64,15 +64,27 @@ so a widened manifest cannot silently widen behaviour without a code change.
 
 Not requested: `canPerformGestures`, `canRequestFilterKeyEvents`,
 `canTakeScreenshot`, `canRequestTouchExplorationMode`, `flagRetrieveInteractiveWindows`,
-or any text-selection capability. The app cannot tap, scroll, type, or capture
-the screen.
+or any text-selection capability. The service cannot synthesise touch gestures
+(that needs `canPerformGestures`), scroll, type, or capture the screen.
+
+The one action it can dispatch is the platform accessibility action
+`ACTION_CLICK` on a node whose label matches `hide_control` in the rules file —
+in practice the `Hide Ad` button Facebook renders on a sponsored post. It is
+pressed only when the post has already been matched by its ad label, only when
+the button sits inside that post's rectangle, and at most once per post. Because
+Facebook preloads the next post before it scrolls in, a press can happen while
+that post is still below the fold; the user then never sees it. A press that
+does not remove the post is never repeated: the post stays visible until it
+scrolls away, and nothing is drawn over it.
 
 ### What it does with what it sees
 
 - Converts the tree to `UiNode` values **in memory**, for the duration of one
   scan.
 - Reads text only to compare the first segment against a small label set from
-  `assets/cosmetic/facebook_rules.txt`.
+  `assets/cosmetic/facebook_rules.txt`, and to find the `Hide Ad` control named
+  by the same file.
+- Presses that control at most once per matched post, if it is present.
 - Discards the tree immediately after the scan.
 - Stores only a counter and a dedupe key made of the matched label plus the
   rectangle (`CosmeticStatistics`). Neither contains post text, author names, or
@@ -80,23 +92,15 @@ the screen.
 - Logs only a configuration warning when the rules file is unusable. No node
   text is ever written to logcat.
 
-### Overlay window
+### No overlay windows
 
-Covers use `TYPE_ACCESSIBILITY_OVERLAY`, the only window type an
-AccessibilityService may add without the separate "draw over other apps"
-permission. They are opaque, non-focusable, and deliberately **not**
-touch-transparent, so a tap on a hidden post does not open the ad.
+The app adds **no** `TYPE_ACCESSIBILITY_OVERLAY` window and draws nothing over
+another app. An earlier build covered matched posts with an opaque rectangle;
+that code was removed because the requirement is that the screen look
+untouched. The service's only effect on the device is the `ACTION_CLICK` above.
 
-Because they are global windows, they are removed in three situations:
-
-- the service is destroyed or interrupted;
-- a 500 ms watchdog sees a foreground package other than Facebook — it reads
-  only `rootInActiveWindow.packageName`, never that window's content;
-- the watchdog cannot read a root at all for 3 s while Facebook was the last
-  known package (a package-scoped device).
-
-The watchdog exists because an earlier build left a cover floating over the
-package installer. That bug is documented in LIMITATIONS.md and TESTING.md.
+There is consequently no window to clean up when the user leaves Facebook, and
+no watchdog process reading the foreground package name.
 
 ### Residual risk
 

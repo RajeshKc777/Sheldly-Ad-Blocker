@@ -41,16 +41,21 @@ statistics, always-on VPN.
 
 ## Facebook sponsored-post hider (Phase 8b, experimental)
 
-Implemented: accessibility service, pure-Kotlin detector, overlay covers,
-session counter, disclosure, label rules kept in a data file rather than in the
-detector. Changing that file still requires a rebuild; it is not a runtime
-setting.
+Implemented: accessibility service, pure-Kotlin detector, a direct press of
+Facebook's own `Hide Ad` button, session counter, disclosure, and label/control
+rules kept in a data file rather than in the detector. Changing that file still
+requires a rebuild; it is not a runtime setting.
+
+There is **no overlay or cover**: a post that exposes no `Hide Ad` button is left
+alone rather than replaced by a visible block. The screen only ever shows what
+Facebook itself renders.
 
 Fragile by nature:
 
-- **The ad is still downloaded and rendered.** The cover is drawn over it. The
-  label must therefore be "ads hidden on screen", never "ads blocked", and any
-  bandwidth or privacy benefit is zero.
+- **The ad is still downloaded.** Pressing `Hide Ad` makes Facebook remove the
+  post from the feed; nothing is filtered at the network level. The label must
+  therefore be "ads hidden on screen", never "ads blocked", and any bandwidth or
+  privacy benefit is zero.
 - **Detection depends on Facebook's label text.** The tested build exposes
   `Ad•Shared with: Public`. Other builds, accounts, or A/B buckets may use
   `Sponsored`, a different separator, or no text node at all. When that happens
@@ -58,36 +63,36 @@ Fragile by nature:
 - **Facebook changes its layout often.** View classes, hierarchy depth, and the
   position of the label change between releases. The detector survives label
   and depth changes because it walks for text, but not the removal of the label
-  node.
+  node. If Facebook renames the `Hide Ad` control, the rules file needs the new
+  name; until then the ad stays visible.
 - **Facebook Lite is not supported in practice.** Its feed exposed **zero text
-  and zero content descriptions** across 63 nodes (measured on the test device).
-  Text-based detection cannot work there. The package is still listed in the
-  accessibility scope, so a future Lite version that exposes text would start
-  working without a manifest change.
-- **Covers move with the feed, but cannot be instant.** A cover is a window in
-  screen coordinates, so the service offsets every cover by the scroll delta as
-  the list moves and re-confirms positions after the feed settles. An ad that
-  scrolls into view is still visible until the next scan covers it (at most about
-  a second during a fast fling). The accessibility tree only exposes a post after
-  Android has laid it out; no overlay can cover it before that.
-- **A cover hides, it does not remove, and it swallows taps.** Tapping where the
-  ad was does nothing instead of opening it. Covers are global windows, so a stale
-  cover would sit over another app; a 500 ms watchdog removes every cover as soon
-  as the foreground package is no longer Facebook, with a 3 s fallback for the
-  case where node access is package-scoped. Before that watchdog existed, a cover
-  was observed blocking the package installer; that is the bug it fixes.
-- **The cover colour is a user choice, not a guess.** Facebook has its own
-  light/dark switch, so a cover derived only from the system theme could sit as
-  a dark block in a light feed. Settings → *Cover colour* picks Match system,
-  Light, or Dark; the setting recolours covers already on screen.
-- **A translucent navigation bar can reveal the bottom strip of a covered post.**
-  On MIUI the accessibility tree reports the app window as ending above the real
-  display edge, so a cover placed on the reported rectangle stopped 66 px short
-  and Facebook content showed dimmed under the bar. Covers for posts that touch
-  the reported bottom edge are now extended to the real display height.
-- **False positives are possible.** A normal post whose header begins with a
-  configured label and is short enough would be covered. The height and
-  segmentation guards make this unlikely, not impossible.
+  and zero content descriptions** across every dump measured on the test device
+  (53–63 nodes, twice on different screens). Text-based detection cannot work
+  there. The package is still listed in the accessibility scope, so a future
+  Lite version that exposes text would start working without a manifest change.
+- **The first frames of a post are drawn before Android reports it.** The
+  service reacts on the accessibility callback (fast path) and on a debounced
+  full scan, so an ad Facebook has just composited can be visible for a moment
+  before it disappears. No accessibility-based hider can act before the view is
+  drawn; that would need root-level view hooks or a modified client. The fast
+  path exists to make that moment as short as the platform allows: it presses
+  Facebook's button from the node that just changed, without waiting for the
+  debounce.
+- **A preloaded ad can be pressed before it scrolls in.** Facebook binds the next
+  post before it is visible, and the service does not require the button to be
+  on screen, so such an ad can be removed while it is still below the fold — the
+  user never sees it. If the platform rejects that press, the post stays visible
+  when it does scroll in; nothing is drawn over it.
+- **Pressing `Hide Ad` is an action inside Facebook, not a local hide.** It is
+  Facebook's own control, so pressing it removes the post *and* records a
+  preference signal on the account. That trade-off is why the feature is opt-in
+  and stated in the disclosure. Each button rectangle is pressed at most once;
+  if the post survives, it is not pressed again and stays visible until it
+  scrolls away.
+- **A wrong label match cannot hide a normal post.** Pressing needs a clickable
+  `Hide Ad` control inside the matched post. Facebook renders that control only
+  on sponsored posts ("Hide post" is a different label and is never matched), so
+  a false label match finds no button and the post is left untouched.
 - **The counter is approximate.** It counts distinct (label, rectangle) pairs in
   one service session. The same ad reappearing at a different position counts
   again; a re-scan of the same position does not.
@@ -98,10 +103,12 @@ Fragile by nature:
 
 Deliberately not done:
 
-- **Auto-tapping Facebook's "Hide Ad" button.** It would be more effective, but
-  it sends a signal to Facebook about the user's advertising preferences and
-  performs an action inside another app. Covering is the least invasive method
-  that works.
+- **Overlay covers.** An opaque block hides the ad but leaves a visible
+  rectangle, and the requirement is that the screen look untouched. Covers were
+  implemented in an earlier build and removed.
+- **Scrolling, liking, opening links, or pressing anything other than `Hide Ad`.**
+  The service has one action in its vocabulary. Anything else would change the
+  user's position or make decisions inside another app.
 - **Screenshot-based or OCR detection.** Requires screen capture, which is a far
   larger permission and would process post content.
 

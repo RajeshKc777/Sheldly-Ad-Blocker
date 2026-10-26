@@ -27,7 +27,6 @@ fun SettingsScreen(
     blocklist: FilterSnapshot,
     status: ProtectionState.Status,
     onUpstream: (SettingsRepository.Upstream) -> Unit,
-    onCoverTheme: (SettingsRepository.CoverTheme) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -93,41 +92,6 @@ fun SettingsScreen(
 
         item {
             FacebookHidingCard()
-        }
-
-        item {
-            SectionCard(title = "Cover colour") {
-                Text(
-                    text = "The blank block drawn over a hidden Facebook post. Facebook has " +
-                        "its own light/dark switch, separate from the system theme, so pick " +
-                        "whichever matches your Facebook feed.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                SettingsRepository.CoverTheme.entries.forEach { theme ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .selectable(
-                                selected = settings.coverTheme == theme,
-                                onClick = { onCoverTheme(theme) },
-                            )
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        RadioButton(
-                            selected = settings.coverTheme == theme,
-                            onClick = { onCoverTheme(theme) },
-                        )
-                        Text(
-                            text = theme.label,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(start = 8.dp),
-                        )
-                    }
-                }
-            }
         }
 
         item {

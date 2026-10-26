@@ -24,13 +24,13 @@ object CosmeticStatistics {
 
     private val _hidden = MutableStateFlow(0L)
 
-    /** Number of distinct sponsored posts covered in this service session. */
+    /** Number of distinct sponsored posts hidden in this service session. */
     val hidden: StateFlow<Long> = _hidden.asStateFlow()
 
     /**
-     * Records a post that is currently covered. Returns `false` when the same
-     * post was already counted, which is the common case: the scan runs again
-     * after every content change.
+     * Records a post that was hidden. Returns `false` when the same post was
+     * already counted, which is the common case: the scan runs again after every
+     * content change.
      */
     fun record(label: String, bounds: com.sentinel.core.cosmetic.Bounds): Boolean {
         val key = "$label:${bounds.left},${bounds.top},${bounds.right},${bounds.bottom}"

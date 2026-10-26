@@ -241,7 +241,6 @@ private fun SentinelRoot(viewModel: SentinelViewModel = viewModel()) {
                         blocklist = blocklist,
                         status = status,
                         onUpstream = viewModel::setUpstream,
-                onCoverTheme = viewModel::setCoverTheme,
                     )
                 }
             }

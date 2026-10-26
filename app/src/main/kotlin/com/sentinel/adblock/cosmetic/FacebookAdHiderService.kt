@@ -8,8 +8,9 @@ import android.os.PowerManager
 import android.os.SystemClock
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import com.sentinel.adblock.SentinelApplication
-import com.sentinel.adblock.storage.SettingsRepository
+import android.view.accessibility.AccessibilityNodeInfo
+import com.sentinel.adblock.BuildConfig
+import com.sentinel.core.cosmetic.Bounds
 import com.sentinel.core.cosmetic.SponsoredDetector
 import com.sentinel.core.cosmetic.SponsoredRules
 import java.util.concurrent.Executors
@@ -19,16 +20,30 @@ import java.util.concurrent.Executors
  *
  * ## What it does
  *
- * On a content change in Facebook or Facebook Lite it walks the visible
- * accessibility tree, asks [SponsoredDetector] which posts are ads, and covers
- * those posts with an opaque accessibility overlay. The ad has still been
- * downloaded and rendered underneath; this only removes it from *view*. The UI
- * therefore says "ads hidden on screen", never "ads blocked".
+ * On a content change in Facebook it looks for Facebook's own "Hide Ad" button
+ * and presses it. That is the only control this app ever presses: the button
+ * exists only on a sponsored post, so finding it is itself proof that the post
+ * is an ad. Facebook then removes the post and reflows the feed, so nothing is
+ * left behind — no blank block, no overlay, no trace.
+ *
+ * Two paths, same action:
+ *
+ * 1. **Immediate**: the node that just changed is walked first, without waiting
+ *    for a debounce. This is the fast path that makes the ad disappear before it
+ *    can be read.
+ * 2. **Full scan**: the visible tree is walked and the button inside each post
+ *    matched by its ad label is pressed. This catches posts that were already on
+ *    screen when the service started, and posts preloaded below the fold.
+ *
+ * There is deliberately **no cover/overlay fallback**: a post that exposes no
+ * "Hide Ad" button is left alone rather than replaced by a visible block.
  *
  * ## What it never does
  *
  * - no text, names, or screenshots are stored or transmitted;
- * - no gestures are dispatched and no clicks are performed on Facebook's UI;
+ * - no scrolling, liking, opening or navigating: the only action dispatched is
+ *   a click on the "Hide Ad" control Facebook renders on an ad post, at most
+ *   once per post;
  * - no other package is observed (`accessibility_service_config.xml` scopes it
  *   to the two Facebook packages);
  * - no work happens while the screen is off.
@@ -36,8 +51,9 @@ import java.util.concurrent.Executors
  * ## Cost
  *
  * A full tree walk is the expensive part. Scans are debounced, run only for the
- * two packages above, and back off when a scan takes too long or the device is
- * in battery saver.
+ * packages above, and back off when a scan takes too long or the device is in
+ * battery saver. The fast path is budgeted and rate-limited so chattering events
+ * stay cheap.
  */
 class FacebookAdHiderService : AccessibilityService() {
 
@@ -47,62 +63,44 @@ class FacebookAdHiderService : AccessibilityService() {
         Thread(runnable, "sentinel-cosmetic").apply { isDaemon = true }
     }
 
+    private var rules: SponsoredRules = SponsoredRules.EMPTY
     private var detector: SponsoredDetector = SponsoredDetector(SponsoredRules.EMPTY)
-    private var overlays: AdOverlayController? = null
 
     private var debounceMs = NORMAL_DEBOUNCE_MS
 
     /** Throttles scans regardless of how chatty Facebook's events are. */
     private var lastScanAt = 0L
 
-    /**
-     * Last time the active window really was Facebook. The watchdog uses this
-     * instead of [lastScanAt] so a null root is not mistaken for "still here".
-     */
-    private var lastFacebookRootAt = 0L
-
     /** Drops results from a scan that a newer content change has superseded. */
     private var generation = 0
 
     /**
-     * Covers are global windows. Facebook-only event scoping means the service
-     * is never told when the user leaves Facebook, so without this watchdog a
-     * cover would float over whatever app is opened next.
+     * Hide Ad button rectangle -> when it was pressed. A button is pressed at
+     * most once, so a control that survives its click cannot be hammered in a
+     * loop. Touched from the main thread (fast path) and the worker (full scan),
+     * so every access is synchronised.
      */
-    private val watchdog = object : Runnable {
-        override fun run() {
-            val activePackage = rootInActiveWindow?.packageName?.toString()
-            val now = SystemClock.uptimeMillis()
-            when {
-                // Another app is in front: remove immediately.
-                activePackage != null && activePackage !in FacebookHiding.packages ->
-                    overlays?.clear()
+    private val hideAttempts = HashMap<String, Long>()
 
-                // If node access is scoped to Facebook, leaving the app yields a
-                // null root rather than another package. Fall back to a grace
-                // period measured from the last time Facebook was really active.
-                activePackage == null && now - lastFacebookRootAt > NULL_ROOT_GRACE_MS ->
-                    overlays?.clear()
-            }
-            if (overlays?.hasCovers == true) {
-                handler.postDelayed(this, WATCHDOG_INTERVAL_MS)
-            }
-        }
-    }
+    /** Rate limit for the fast path, so a surviving button is not hammered. */
+    private var lastQuickPressAt = 0L
+
+    /** Rate limit for the fast-path walk itself, so chattering events stay cheap. */
+    private var lastQuickWalkAt = 0L
 
     private val scanRunnable = Runnable { runScan() }
 
     override fun onServiceConnected() {
         super.onServiceConnected()
 
-        val rules = FacebookHiding.readRules(this)
+        rules = FacebookHiding.readRules(this)
         detector = SponsoredDetector(rules)
-        overlays = AdOverlayController(this, coverTheme())
 
         if (!rules.isUsable) {
             // No screen text is logged, only the fact that configuration failed.
             Log.w(TAG, "Sponsored rules are missing or empty; hiding is inactive.")
         }
+        if (BuildConfig.DEBUG) Log.i(TAG, "hider connected: fast-path build")
 
         // The service can be enabled while Facebook is already on screen and
         // idle, so do not wait for the next content change to hide anything.
@@ -121,25 +119,28 @@ class FacebookAdHiderService : AccessibilityService() {
         if (!isScreenOn()) return
         if (event.packageName?.toString() !in FacebookHiding.packages) return
 
-        // Covers live in screen coordinates. Rather than dropping them on every
-        // scroll (which left the ad visible until the feed stopped moving), move
-        // them with the list, then rescan to catch posts that scrolled into view.
-        when (type) {
-            AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
-                overlays?.clear()
-                scheduleScan(baseDelay = 0L)
-            }
+        val eventAt = SystemClock.uptimeMillis()
 
-            AccessibilityEvent.TYPE_VIEW_SCROLLED -> {
-                // A delta of zero means we cannot know how far the list moved;
-                // a cover in the wrong place is worse than no cover.
-                val delta = event.scrollDeltaY
-                if (delta != 0) overlays?.offsetBy(delta) else overlays?.clear()
-                scheduleScan(baseDelay = currentDelay())
+        // Fast path: the node that just changed usually contains the post that
+        // appeared, including Facebook's own "Hide Ad" button. Pressing it here
+        // skips the debounce entirely — that wait is what made the ad visible
+        // long enough to read.
+        if (type == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED ||
+            type == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+        ) {
+            val source = runCatching { event.source }.getOrNull()
+            if (source != null && pressHideControlNow(source, eventAt)) {
+                if (BuildConfig.DEBUG) {
+                    Log.d(TAG, "fast press in ${SystemClock.uptimeMillis() - eventAt}ms")
+                }
+                scheduleScan(baseDelay = QUICK_RESCAN_MS)
+                return
             }
-
-            else -> scheduleScan(baseDelay = currentDelay())
         }
+
+        // Posts enter the feed as it scrolls, so both a scroll and a content
+        // change are reasons for a full scan.
+        scheduleScan(baseDelay = if (type == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) 0L else currentDelay())
     }
 
     private fun currentDelay(): Long =
@@ -158,14 +159,10 @@ class FacebookAdHiderService : AccessibilityService() {
 
     override fun onInterrupt() {
         handler.removeCallbacks(scanRunnable)
-        overlays?.clear()
     }
 
     override fun onDestroy() {
         handler.removeCallbacks(scanRunnable)
-        handler.removeCallbacks(watchdog)
-        overlays?.clear()
-        overlays = null
         worker.shutdownNow()
         super.onDestroy()
     }
@@ -178,22 +175,34 @@ class FacebookAdHiderService : AccessibilityService() {
         val root = rootInActiveWindow ?: return
         val packageName = root.packageName?.toString()
         if (packageName !in FacebookHiding.packages) return
-        lastFacebookRootAt = lastScanAt
-
         val screenHeight = resources.displayMetrics.heightPixels
-        // The accessibility tree reports the app window as ending above the real
-        // display edge on some OEM builds (MIUI draws a translucent navigation
-        // bar over app content). Captured here so a matched post that touches
-        // that reported edge can be covered all the way down.
-        val rootBounds = Rect().also { root.getBoundsInScreen(it) }
         val scanGeneration = ++generation
 
-        // Tree walking is the expensive part; keeping it off the main thread
-        // means Facebook's own scrolling never waits for our scan.
+        // Tree walking and the button press are the expensive parts; keeping
+        // them off the main thread means Facebook's own scrolling never waits.
         worker.execute {
             val started = SystemClock.uptimeMillis()
-            val tree = AccessibilityTreeReader.read(root) ?: return@execute
-            val matches = detector.findAds(tree, screenHeight)
+            val snapshot = AccessibilityTreeReader.read(root, rules) ?: return@execute
+            val matches = detector.findAds(snapshot.tree, screenHeight)
+
+            val now = SystemClock.uptimeMillis()
+            prunePresses(now)
+
+            val handled = ArrayList<Pair<String, Bounds>>(matches.size)
+            for (match in matches) {
+                val control = snapshot.hideControls.firstOrNull { hit ->
+                    contains(match.container, hit.bounds)
+                } ?: continue
+
+                val key = keyOf(control.bounds)
+                if (wasPressed(key)) continue
+
+                val pressed = runCatching {
+                    control.node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                }.getOrDefault(false)
+                rememberPress(key, now)
+                if (pressed) handled.add(match.label to match.container)
+            }
             val cost = SystemClock.uptimeMillis() - started
 
             handler.post {
@@ -204,32 +213,96 @@ class FacebookAdHiderService : AccessibilityService() {
                 // times a second, but recover as soon as scans are cheap again.
                 debounceMs = if (cost > SLOW_SCAN_MS) SLOW_DEBOUNCE_MS else NORMAL_DEBOUNCE_MS
 
-                for (match in matches) {
-                    CosmeticStatistics.record(match.label, match.container)
+                if (handled.isNotEmpty() && BuildConfig.DEBUG) {
+                    Log.d(TAG, "scan pressed ${handled.size} in ${cost}ms")
                 }
-                val rects = matches.map { match ->
-                    val container = match.container
-                    if (container.bottom >= rootBounds.bottom - EDGE_TOLERANCE_PX) {
-                        container.copy(bottom = maxOf(container.bottom, screenHeight))
-                    } else {
-                        container
-                    }
-                }
-                val controller = overlays
-                controller?.setTheme(coverTheme())
-                controller?.render(rects)
-                if (controller?.hasCovers == true) {
-                    handler.removeCallbacks(watchdog)
-                    handler.postDelayed(watchdog, WATCHDOG_INTERVAL_MS)
-                }
+                for ((label, bounds) in handled) CosmeticStatistics.record(label, bounds)
             }
         }
     }
 
-    /** Cover colour chosen by the user; falls back to the system theme. */
-    private fun coverTheme(): SettingsRepository.CoverTheme =
-        (application as? SentinelApplication)?.container?.settings?.state?.value?.coverTheme
-            ?: SettingsRepository.CoverTheme.SYSTEM
+    /**
+     * Fast path: walks the subtree that just changed and presses a "Hide Ad"
+     * control the moment it is visible.
+     *
+     * This runs on the accessibility callback thread, before the debounced full
+     * scan, and is what removes the flash of an ad entering the feed. The walk
+     * is breadth-first so a control near the top of a new post is found before
+     * the depth of the first one is exhausted, and the node budget keeps the
+     * callback a few milliseconds long.
+     *
+     * Pressing is safe without a container match: Facebook renders "Hide Ad"
+     * only on a sponsored post, never on a normal one ("Hide post" is a
+     * different control and is never matched).
+     */
+    private fun pressHideControlNow(source: AccessibilityNodeInfo, now: Long): Boolean {
+        if (now - lastQuickPressAt < QUICK_PRESS_MIN_GAP_MS) return false
+        if (now - lastQuickWalkAt < QUICK_WALK_MIN_GAP_MS) return false
+        lastQuickWalkAt = now
+
+        // Starting at the parent covers one more sibling level: when the node
+        // that changed is the ad's timestamp, the Hide Ad button is a sibling.
+        val start = runCatching { source.parent }.getOrNull() ?: source
+
+        var budget = QUICK_SCAN_NODES
+        val queue = ArrayDeque<AccessibilityNodeInfo>()
+        queue.addLast(start)
+
+        while (queue.isNotEmpty() && budget-- > 0) {
+            val node = queue.removeFirst()
+            val label = node.text?.toString()?.takeIf { it.isNotBlank() }
+                ?: node.contentDescription?.toString()?.takeIf { it.isNotBlank() }
+
+            if (label != null && node.isClickable && rules.isHideControl(label)) {
+                val rect = Rect().also { node.getBoundsInScreen(it) }
+                if (rect.isEmpty) return false
+                val key = keyOf(Bounds(rect.left, rect.top, rect.right, rect.bottom))
+                if (wasPressed(key)) return false
+
+                val pressed = runCatching {
+                    node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                }.getOrDefault(false)
+
+                lastQuickPressAt = now
+                rememberPress(key, now)
+                if (pressed) {
+                    CosmeticStatistics.record(
+                        label,
+                        Bounds(rect.left, rect.top, rect.right, rect.bottom),
+                    )
+                }
+                return pressed
+            }
+
+            if (budget <= 0) break
+            for (index in 0 until node.childCount) {
+                node.getChild(index)?.let(queue::addLast)
+            }
+        }
+        return false
+    }
+
+    /** [inner] sits entirely within [outer]. */
+    private fun contains(outer: Bounds, inner: Bounds): Boolean =
+        inner.left >= outer.left &&
+            inner.top >= outer.top &&
+            inner.right <= outer.right &&
+            inner.bottom <= outer.bottom
+
+    private fun keyOf(bounds: Bounds): String =
+        "${bounds.left},${bounds.top},${bounds.right},${bounds.bottom}"
+
+    private fun wasPressed(key: String): Boolean = synchronized(hideAttempts) {
+        hideAttempts.containsKey(key)
+    }
+
+    private fun rememberPress(key: String, at: Long) = synchronized(hideAttempts) {
+        hideAttempts[key] = at
+    }
+
+    private fun prunePresses(now: Long) = synchronized(hideAttempts) {
+        hideAttempts.entries.removeAll { now - it.value > HIDE_COOLDOWN_MS }
+    }
 
     private fun isScreenOn(): Boolean {
         val power = getSystemService(PowerManager::class.java) ?: return true
@@ -243,14 +316,28 @@ class FacebookAdHiderService : AccessibilityService() {
 
     private companion object {
         const val TAG = "SentinelCosmetic"
-        const val NORMAL_DEBOUNCE_MS = 150L
+        const val NORMAL_DEBOUNCE_MS = 60L
         const val SLOW_DEBOUNCE_MS = 900L
-        const val MAX_SCAN_LATENCY_MS = 900L
+        const val MAX_SCAN_LATENCY_MS = 250L
         const val SLOW_SCAN_MS = 80L
-        const val WATCHDOG_INTERVAL_MS = 500L
-        const val NULL_ROOT_GRACE_MS = 3_000L
 
-        /** Slack for "this post touches the reported bottom edge of the window". */
-        const val EDGE_TOLERANCE_PX = 8
+        /** Nodes visited by the fast path before it gives up and waits for a scan. */
+        const val QUICK_SCAN_NODES = 240
+
+        /** Minimum gap between fast-path walks; content events can be chatty. */
+        const val QUICK_WALK_MIN_GAP_MS = 25L
+
+        /** Minimum gap between fast-path presses, so a stuck button is not hammered. */
+        const val QUICK_PRESS_MIN_GAP_MS = 250L
+
+        /** Rescan after a fast-path press, to refresh the counter. */
+        const val QUICK_RESCAN_MS = 250L
+
+        /**
+         * A button rectangle is not pressed again within this window. Short on
+         * purpose: a new ad can occupy the same screen position as the previous
+         * one, so a long window would silently skip it.
+         */
+        const val HIDE_COOLDOWN_MS = 2_000L
     }
 }

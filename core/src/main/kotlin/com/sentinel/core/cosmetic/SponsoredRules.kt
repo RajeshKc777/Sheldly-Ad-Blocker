@@ -22,11 +22,17 @@ import java.util.Locale
  * max_joined_label_fraction=0.12
  * min_container_fraction=0.15
  * max_container_fraction=0.95
+ * hide_control=Hide Ad
  * ```
  *
  * All fractions are of the screen height. If the file is empty or unreadable
  * the label set is empty and the detector finds nothing: the failure mode is
  * "hide nothing", never "hide a post we did not understand".
+ *
+ * `hide_control` names the button Facebook itself puts on an ad post. When one
+ * is found inside a matched post, the service presses it instead of covering
+ * the post, so Facebook removes the ad and the feed closes the gap. Leaving the
+ * key out means the app never presses anything.
  */
 class SponsoredRules private constructor(
     val labels: Set<String>,
@@ -35,12 +41,20 @@ class SponsoredRules private constructor(
     val maxJoinedLabelFraction: Double,
     val minContainerFraction: Double,
     val maxContainerFraction: Double,
+    val hideControls: Set<String>,
 ) {
 
     val isUsable: Boolean get() = labels.isNotEmpty()
 
     /** True when [segment] is one of the configured ad labels. */
     fun isLabel(segment: String): Boolean = normalize(segment) in labels
+
+    /**
+     * True when [value] is a control this app may press, e.g. Facebook's own
+     * "Hide Ad" button. Compared after the same normalisation as labels, so
+     * case and look-alike characters do not matter.
+     */
+    fun isHideControl(value: String): Boolean = normalize(value) in hideControls
 
     companion object {
 
@@ -56,10 +70,12 @@ class SponsoredRules private constructor(
             maxJoinedLabelFraction = 0.12,
             minContainerFraction = 0.15,
             maxContainerFraction = 0.95,
+            hideControls = emptySet(),
         )
 
         fun parse(text: String): SponsoredRules {
             val labels = LinkedHashSet<String>()
+            val hideControls = LinkedHashSet<String>()
             var separators = DEFAULT_SEPARATORS
             var maxLabel = 0.06
             var maxJoined = 0.12
@@ -75,6 +91,7 @@ class SponsoredRules private constructor(
                 val value = line.substring(split + 1).trim()
                 when (key) {
                     "label" -> normalize(value).takeIf { it.isNotEmpty() }?.let(labels::add)
+                    "hide_control" -> normalize(value).takeIf { it.isNotEmpty() }?.let(hideControls::add)
                     "separator" -> if (value.isNotEmpty()) {
                         separators = separators + value
                     }
@@ -92,6 +109,7 @@ class SponsoredRules private constructor(
                 maxJoinedLabelFraction = maxJoined,
                 minContainerFraction = minContainer,
                 maxContainerFraction = maxContainer,
+                hideControls = hideControls,
             )
         }
 

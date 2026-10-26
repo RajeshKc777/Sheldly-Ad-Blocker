@@ -56,9 +56,9 @@ cd Sheldly-Ad-Blocker
 Present tense, imperative, with the *why* in the body when it is not obvious:
 
 ```
-Fix stale overlay after leaving Facebook
+Press the Hide Ad control from the changed subtree
 
-The watchdog cleared covers only when rootInActiveWindow was null;
-MIUI keeps a stale root during app transitions, so covers survived
-into the installer UI. Compare package name instead.
+A full tree walk took ~40 ms, which was longer than the ad stayed on
+screen. Walk the subtree carried by the accessibility event first and
+press the control there, without waiting for the debounce.
 ```
