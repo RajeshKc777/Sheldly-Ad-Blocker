@@ -66,6 +66,13 @@ fun FacebookHidingCard(modifier: Modifier = Modifier) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 2.dp),
                 )
+                Text(
+                    text = "Facebook Lite is not supported: its feed exposes no text to " +
+                        "accessibility, so there is nothing to detect.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 2.dp),
+                )
             }
             Switch(
                 checked = enabled,

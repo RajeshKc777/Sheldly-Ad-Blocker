@@ -7,5 +7,5 @@
 
     <!-- Experimental Facebook sponsored-post hider (AccessibilityService). -->
     <string name="cosmetic_service_label">Shieldly sponsored-post hider</string>
-    <string name="cosmetic_service_description">Covers posts that Facebook labels as ads. Works only inside Facebook and Facebook Lite, never stores or transmits screen text, and can be turned off at any time in Accessibility settings.</string>
+    <string name="cosmetic_service_description">Covers posts that the Facebook app labels as ads. Facebook Lite exposes no post text to accessibility, so nothing is hidden there. Never stores or transmits screen text, and can be turned off at any time in Accessibility settings.</string>
 </resources>

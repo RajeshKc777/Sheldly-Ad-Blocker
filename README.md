@@ -342,7 +342,7 @@ The short list; the long list with evidence lives in [`docs/LIMITATIONS.md`](doc
 | IPv6 DNS | Counted, not filtered |
 | QUIC / HTTP-3 | Not DNS; never touches the tunnel |
 | Ad-URL style blocking (`/ad.png` on a shared CDN) | Not possible without content inspection |
-| YouTube, Instagram, Facebook in-feed video ads | Not removed by DNS; the Facebook hider covers only labelled feed posts |
+| YouTube, Instagram, Facebook Lite, Reels/video ads | Not removed by DNS; the hider covers only labelled feed posts in the main Facebook app — Facebook Lite exposes no text to accessibility, so nothing can be detected there |
 | Banking/sensitive apps | Should work normally (only DNS names are seen) — if one misbehaves, add an allow rule |
 | Two VPN apps | Android allows one at a time; enabling another **revokes** Shieldly's tunnel |
 | Play Store policy | Accessibility-based UI modification is high-risk; this build is **not** published on Play |
