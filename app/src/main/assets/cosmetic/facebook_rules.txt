@@ -1,0 +1,47 @@
+# Sentinel — Facebook sponsored-post detection rules
+#
+# This file is data, not code: Facebook changes its ad label and layout often,
+# so the rules live here and can be replaced without touching Kotlin.
+#
+# Format: key=value, one per line. '#' or '!' starts a comment.
+#
+# label=      a token that marks a post as advertising when it is the first
+#             segment of a post-header label. Matching ignores case, invisible
+#             characters, and full-width look-alikes.
+# separator=  a character that ends the label segment. "Ad•Shared with: Public"
+#             therefore matches on "Ad".
+# *_fraction= layout thresholds as a fraction of the screen height.
+#
+# Empty or unreadable file => no labels => nothing is ever hidden. The failure
+# mode is deliberate: a wrong hide is worse than a missed hide.
+#
+# Observed on a Redmi Note 8 Pro (Android 11) with Facebook installed from the
+# Play Store: the header exposed "Ad•Shared with: Public" as both text and
+# content-desc. The literal word "Sponsored" did not appear in the tree.
+# Keep both: Facebook A/B-tests the wording.
+
+label=Ad
+label=Sponsored
+label=Gesponsert
+label=Anzeige
+label=Sponsorisé
+label=Patrocinado
+label=प्रायोजित
+label=प्रवर्तित
+
+separator=•
+separator=·
+separator=|
+separator= -
+
+# A label node taller than 6% of the screen is not a label, it is content that
+# happens to contain the word.
+max_label_fraction=0.06
+
+# A label reassembled from 2-4 child views gets a little more room.
+max_joined_label_fraction=0.12
+
+# A post is at least 15% and at most 95% of the screen. The upper bound stops
+# the whole feed from being treated as one post.
+min_container_fraction=0.15
+max_container_fraction=0.95

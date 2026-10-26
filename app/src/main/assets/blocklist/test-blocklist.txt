@@ -1,0 +1,89 @@
+! Sentinel - bundled starter blocklist
+!
+! WHAT THIS IS
+! A small, hand-picked list of advertising and tracking host names used to
+! exercise the filtering engine and to give a fresh install something to block.
+! It is NOT a complete ad blocklist and it is not derived from any list that has
+! licence terms attached to it. Every entry below is a host name that is
+! published by the operator of that service as its own advertising or analytics
+! endpoint, or a well-known ad-serving domain.
+!
+! HOW TO EXTEND IT
+! Either edit this file (app/src/main/assets/blocklist/test-blocklist.txt) or
+! add hosts through the app's Rules screen. User rules always win over this file.
+!
+! SYNTAX SUPPORTED BY THE PARSER
+!   ||example.com^     block example.com and all subdomains
+!   0.0.0.0 example.com   hosts-file form
+!   example.com        bare host name
+!   @@||example.com^   exception (allow) rule
+!   ! comment  /  # comment  /  [section header]
+!
+! NOT SUPPORTED (counted and reported, never silently accepted)
+!   cosmetic rules (##.ad-banner), $-modifiers, paths, wildcards, regex.
+!   Those belong to browser-level blockers; this app filters DNS names only.
+
+! ---------------------------------------------------------------------------
+! Google advertising and analytics endpoints
+! ---------------------------------------------------------------------------
+||doubleclick.net^
+||googleadservices.com^
+||googlesyndication.com^
+||google-analytics.com^
+||googletagmanager.com^
+||adservice.google.com^
+||pagead2.googlesyndication.com^
+||partner.googleadservices.com^
+||2mdn.net^
+
+! ---------------------------------------------------------------------------
+! Independent ad exchanges and networks
+! ---------------------------------------------------------------------------
+||adnxs.com^
+||adsrvr.org^
+||rubiconproject.com^
+||pubmatic.com^
+||openx.net^
+||criteo.com^
+||criteo.net^
+||taboola.com^
+||outbrain.com^
+||smartadserver.com^
+||casalemedia.com^
+||indexww.com^
+||sharethrough.com^
+||teads.tv^
+||spotxchange.com^
+||yieldmo.com^
+||moatads.com^
+||amazon-adsystem.com^
+
+! ---------------------------------------------------------------------------
+! Measurement and attribution SDK endpoints
+! ---------------------------------------------------------------------------
+||scorecardresearch.com^
+||quantserve.com^
+||chartbeat.com^
+||mixpanel.com^
+||amplitude.com^
+||segment.io^
+||adjust.com^
+||appsflyer.com^
+||kochava.com^
+||newrelic.com^
+
+! ---------------------------------------------------------------------------
+! Mobile ad SDKs (common in free apps and games)
+! ---------------------------------------------------------------------------
+||adcolony.com^
+||applovin.com^
+||unityads.unity3d.com^
+||inmobi.com^
+||mopub.com^
+||chartboost.com^
+||tapjoy.com^
+||vungle.com^
+||ironsrc.com^
+||startapp.com^
+||supersonicads.com^
+||fyber.com^

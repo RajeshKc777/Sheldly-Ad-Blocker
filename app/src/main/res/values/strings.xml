@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Shieldly</string>
+    <string name="notif_channel_name">Protection</string>
+    <string name="notif_channel_description">Shown while DNS filtering is running.</string>
+    <string name="notif_title">Shieldly protection is active</string>
+
+    <!-- Experimental Facebook sponsored-post hider (AccessibilityService). -->
+    <string name="cosmetic_service_label">Shieldly sponsored-post hider</string>
+    <string name="cosmetic_service_description">Covers posts that Facebook labels as ads. Works only inside Facebook and Facebook Lite, never stores or transmits screen text, and can be turned off at any time in Accessibility settings.</string>
+</resources>

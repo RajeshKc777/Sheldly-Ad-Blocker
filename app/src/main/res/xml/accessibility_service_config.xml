@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Accessibility scope for the experimental Facebook sponsored-post hider.
+
+  Deliberately minimal:
+  - only two packages are reported to the service;
+  - only window state/content changes are requested (no gestures, no key
+    filtering, no screenshots, no text selection);
+  - window content access is required because the ad label is text.
+
+  Changing this file widens what the service can observe. Treat it as a
+  permission, not a setting.
+-->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged|typeViewScrolled"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagDefault"
+    android:canRetrieveWindowContent="true"
+    android:description="@string/cosmetic_service_description"
+    android:notificationTimeout="100"
+    android:packageNames="com.facebook.katana,com.facebook.lite"
+    android:settingsActivity="com.sentinel.adblock.MainActivity" />

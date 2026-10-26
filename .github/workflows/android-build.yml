@@ -1,0 +1,84 @@
+name: android-build
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*.*.*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle (caches dependencies between runs)
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run unit tests and build the APK
+        run: ./gradlew test assembleDebug --stacktrace
+
+      - name: Verify the APK exists and is not empty
+        run: |
+          test -s app/build/outputs/apk/debug/app-debug.apk
+          ls -lh app/build/outputs/apk/debug/
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Shieldly-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Publish APK to GitHub Releases
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build the APK (version stamped from the tag)
+        run: ./gradlew assembleDebug -Papp.versionName=${GITHUB_REF_NAME#v} --stacktrace
+
+      - name: Stage the release asset with its version in the name
+        run: |
+          mkdir -p apk
+          cp app/build/outputs/apk/debug/app-debug.apk \
+             "apk/Shieldly-${GITHUB_REF_NAME#v}-debug.apk"
+          ls -lh apk/
+
+      - name: Create the GitHub release and attach the APK
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "Shieldly ${GITHUB_REF_NAME#v}" \
+            --generate-notes \
+            "apk/Shieldly-${GITHUB_REF_NAME#v}-debug.apk"
