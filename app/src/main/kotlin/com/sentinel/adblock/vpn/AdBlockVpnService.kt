@@ -84,8 +84,14 @@ class AdBlockVpnService : VpnService() {
             return START_NOT_STICKY
         }
         ensureForeground()
+        val restart = intent?.action == VpnController.ACTION_RESTART
         scope.launch {
-            startMutex.withLock { startProtection() }
+            startMutex.withLock {
+                // A restart re-reads the bypass list; the descriptor must be
+                // closed first or startProtection() would return early.
+                if (restart) stopTunnel()
+                startProtection()
+            }
         }
         return START_STICKY
     }
@@ -124,6 +130,7 @@ class AdBlockVpnService : VpnService() {
         }
 
         val upstream = container.settings.state.value.upstream
+        val excludedApps = container.settings.state.value.excludedApps
         val builder = Builder()
             .setSession(getString(R.string.app_name))
             .setMtu(MTU)
@@ -140,6 +147,19 @@ class AdBlockVpnService : VpnService() {
             builder.addDisallowedApplication(packageName)
         } catch (_: PackageManager.NameNotFoundException) {
             // Impossible for our own package; never fail a tunnel over it.
+        }
+
+        // Split tunnelling: user-picked apps leave the device directly, so they
+        // never observe a VPN network and keep working (banking, payments, any
+        // app that refuses to run behind one). A package that is not installed
+        // any more is skipped rather than failing the whole tunnel.
+        for (excluded in excludedApps) {
+            if (excluded == packageName) continue
+            try {
+                builder.addDisallowedApplication(excluded)
+            } catch (_: PackageManager.NameNotFoundException) {
+                // Stale entry from an uninstalled app; harmless.
+            }
         }
 
         val descriptor: ParcelFileDescriptor? = try {

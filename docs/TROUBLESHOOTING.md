@@ -46,6 +46,20 @@ reboot needed.
 | Ads in Reels/Stories/Marketplace still show | Out of scope by design (labelled feed posts only) | See [LIMITATIONS.md](LIMITATIONS.md) |
 | MIUI kills the hider | Battery optimisation | Autostart **on**, battery saver **No restrictions** for Shieldly |
 
+## A banking or payment app refuses to run
+
+Symptom: the app says a VPN is active, shows a security warning, or closes itself while protection is on.
+
+This is not a bug in the filter. Android tells every app that a VPN is in use, and banks treat that as a risk signal.
+
+1. Open **Shieldly → Settings → Apps that bypass the filter**.
+2. Search for the app and tick it.
+3. Tap **Done**. Protection restarts on its own and the tunnel is rebuilt without that app.
+
+The app now leaves through your normal connection and stops seeing a VPN. Ads inside it are no longer filtered — see [LIMITATIONS](LIMITATIONS.md#split-tunnelling-and-the-apps-that-need-it).
+
+If the bank still refuses, it is detecting something else (root, a modified system, or Play Integrity) and the filter is not the cause.
+
 ## Installation problems
 
 | Symptom | Cause | Fix |

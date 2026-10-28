@@ -31,6 +31,12 @@ class SettingsRepository(context: Context) {
         val upstream: Upstream = Upstream.CLOUDFLARE,
         val allowlist: Set<String> = emptySet(),
         val denylist: Set<String> = emptySet(),
+        /**
+         * Packages whose traffic must leave the device directly instead of
+         * entering the tunnel. Banking and payment apps refuse to run while a
+         * VPN is active; excluding them means they never see one.
+         */
+        val excludedApps: Set<String> = emptySet(),
     )
 
     /**
@@ -65,10 +71,20 @@ class SettingsRepository(context: Context) {
         _state.update { it.copy(denylist = domains.toSet()) }
     }
 
+    /**
+     * Package names are stored verbatim: an app that is uninstalled and later
+     * reinstalled keeps its bypass without the user having to notice.
+     */
+    fun setExcludedApps(packages: Set<String>) {
+        prefs.edit().putStringSet(KEY_EXCLUDED_APPS, HashSet(packages)).apply()
+        _state.update { it.copy(excludedApps = packages.toSet()) }
+    }
+
     private fun read(): Settings = Settings(
         upstream = Upstream.fromKey(prefs.getString(KEY_UPSTREAM, null)),
         allowlist = prefs.getStringSet(KEY_ALLOWLIST, null)?.toSet() ?: emptySet(),
         denylist = prefs.getStringSet(KEY_DENYLIST, null)?.toSet() ?: emptySet(),
+        excludedApps = prefs.getStringSet(KEY_EXCLUDED_APPS, null)?.toSet() ?: emptySet(),
     )
 
     private companion object {
@@ -76,5 +92,6 @@ class SettingsRepository(context: Context) {
         const val KEY_UPSTREAM = "upstream"
         const val KEY_ALLOWLIST = "allowlist"
         const val KEY_DENYLIST = "denylist"
+        const val KEY_EXCLUDED_APPS = "excluded_apps"
     }
 }

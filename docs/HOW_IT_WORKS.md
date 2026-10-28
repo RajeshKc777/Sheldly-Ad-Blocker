@@ -86,3 +86,11 @@ is removed.
 DNS filtering therefore cannot remove an ad that lives on the same domain as the
 content you asked for, and cannot inspect HTTPS URLs. That is the honest boundary
 of the technique, not a missing feature to be promised later.
+
+## 8. Apps that are allowed to skip the tunnel
+
+A local VPN is still a VPN as far as Android is concerned, and some apps refuse to run while one is active — banks and payment wallets mostly. Shieldly therefore supports split tunnelling: packages you list under **Settings → Apps that bypass the filter** are added with `Builder.addDisallowedApplication(packageName)` before `establish()`.
+
+For those apps nothing changes: their sockets use the real network, the system resolver answers their lookups, and `NetworkCapabilities` never reports `TRANSPORT_VPN` to them. They also skip the filter entirely, which is the price of compatibility.
+
+Changing the list while protection is running sends `ACTION_RESTART` to the service, which closes the current descriptor and establishes a new one so the change applies immediately.

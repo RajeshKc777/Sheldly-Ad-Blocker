@@ -8,6 +8,18 @@
     <!-- API 33+: without this the foreground notification is hidden. The tunnel still works. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!--
+        Needed on API 30+ to list launchable apps in the bypass picker. Without
+        it package visibility filtering hides them and the picker would show
+        only Shieldly itself.
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
     <application
         android:name=".SentinelApplication"
         android:allowBackup="false"

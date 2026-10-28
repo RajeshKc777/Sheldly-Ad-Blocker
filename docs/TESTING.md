@@ -149,6 +149,27 @@ Unchanged from Phase 6:
 3. `adb shell ping -c 1 example.com` → expected a reply.
 4. Dashboard counters increase; "Recent blocked lookups" lists the domain.
 
+## Manual procedure - per-app bypass
+
+1. Enable protection and confirm the VPN key icon in the status bar.
+2. Open an app that refuses to run behind a VPN (a banking app is the usual case) and note the failure.
+3. **Settings → Apps that bypass the filter** → tick that app → **Done**.
+4. Protection restarts by itself. Confirm the key icon stays, then open the app again: it must start normally.
+5. Confirm the choice persisted, not just the screen state:
+
+```powershell
+adb shell run-as com.sentinel.adblock cat shared_prefs/sentinel_settings.xml
+```
+
+`excluded_apps` must contain the package name. Debug builds only (`run-as` needs a debuggable app).
+
+6. Confirm the filter is still working for everything else while the bypass is active:
+
+```powershell
+adb shell ping -c 1 doubleclick.net    # must be: unknown host
+adb shell ping -c 1 example.com        # must resolve
+```
+
 ## Known gaps in test coverage
 
 - No instrumented (`androidTest`) tests. The service and the

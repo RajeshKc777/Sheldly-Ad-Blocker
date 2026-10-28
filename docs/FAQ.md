@@ -88,3 +88,11 @@ The app was developed under the working name Sentinel; the user-facing name was
 changed to Shieldly shortly before release. Package identifiers were kept so
 updates install in place. Internal log tags still say `sentinel` — that is
 cosmetic, not a different product.
+
+## A banking app says "VPN detected" and refuses to run. What now?
+
+Android reports the tunnel to every app, and most banking, wallet and government apps treat "a VPN is active" as a sign of interception. Shieldly is a VPN by design, so they see one.
+
+Open **Settings → Apps that bypass the filter** and tick that app. It is then handed to `VpnService.Builder.addDisallowedApplication()`, so its traffic leaves through your normal connection and it never observes a VPN network.
+
+The honest trade-off: a bypassed app is **not filtered at all**. Its DNS goes to the normal resolver, so its ads and trackers reach it. Bypass is a compatibility switch, not a privacy mode. Turning protection off would also satisfy the bank, but then nothing is blocked for any app.

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.sentinel.adblock.SentinelApplication
 import com.sentinel.adblock.monitoring.ProtectionState
 import com.sentinel.adblock.storage.SettingsRepository
+import com.sentinel.adblock.vpn.VpnController
 import com.sentinel.core.blocklists.FilterSnapshot
 import com.sentinel.core.filtering.Domains
 import kotlinx.coroutines.Dispatchers
@@ -99,5 +100,14 @@ class SentinelViewModel(application: Application) : AndroidViewModel(application
     private suspend fun applyUserRules() {
         val snapshot = container.blocklists.refreshUserRules()
         _blocklist.value = snapshot
+    }
+
+    /**
+     * Persists the bypass list and re-establishes the tunnel so it applies at
+     * once. Doing it here (not per toggle) keeps the restart to one per edit.
+     */
+    fun setExcludedApps(packages: Set<String>) {
+        container.settings.setExcludedApps(packages)
+        VpnController.restart(getApplication())
     }
 }

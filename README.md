@@ -68,6 +68,7 @@
 | 🔎 **Rule checker** | ✅ Implemented | Type any domain and see exactly which rule would match it |
 | 🌐 **Upstream resolver choice** | ✅ Implemented | Cloudflare, Google, Quad9, AdGuard (plain UDP/53) |
 | 📊 **Live counters** | ✅ Implemented | Lookups, blocked, cache hits, IPv6 observations — all in memory |
+| 🔀 **Per-app bypass (split tunnelling)** | ✅ Implemented | Apps you exclude — banking, payments, anti-cheat — leave through the real network so they never see a VPN; ads inside them are not filtered |
 | 📱 **Facebook sponsored-post hider** | ✅ Experimental | Opt-in AccessibilityService that presses Facebook's own `Hide Ad` button on labelled ad posts, so Facebook removes them — nothing is drawn over the feed |
 | 🔄 **Auto-updating blocklists** | 🟡 Library ready, not wired in | HTTPS fetcher + validator exist and are unit-tested; no UI or schedule yet |
 | 🌍 IPv6 DNS filtering | ❌ Not implemented | IPv6 packets are counted, not filtered |
@@ -76,7 +77,8 @@
 
 ## 📈 Project status
 
-- **Implemented and verified:** local VPN DNS filter, domain matcher with allow-first precedence, TTL-aware cache, upstream forwarding with SERVFAIL fail-open, Compose UI (dashboard / rules / stats / settings), experimental Facebook sponsored-post hider (direct `Hide Ad` press, no overlay).
+- **Implemented and verified:** local VPN DNS filter, domain matcher with allow-first precedence, TTL-aware cache, upstream forwarding with SERVFAIL fail-open, Compose UI (dashboard / rules / stats / settings), experimental Facebook sponsored-post hider (direct `Hide Ad` press, no overlay), per-app bypass so banking apps keep working behind the filter.
+
 - **Library code, not wired into the app yet:** HTTPS blocklist downloader + validator (`core/…/blocklists/BlocklistUpdater.kt`). The app currently uses only its **bundled starter list (49 rules)**.
 - **Not implemented:** IPv6 filtering, DoH/DoT interception, HTTPS content inspection, browser packaging, release signing, Play Store publishing.
 - **Verified on hardware:** Xiaomi Redmi Note 8 Pro (Android 11, MIUI). Emulator coverage: API 36.

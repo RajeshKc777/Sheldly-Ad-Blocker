@@ -39,6 +39,14 @@ Limits that are inherent to the approach:
 Not implemented: per-app rules, scheduled list downloads, Room-backed
 statistics, always-on VPN.
 
+### Split tunnelling and the apps that need it
+
+Banks, wallets, government apps and a few anti-cheat games refuse to run while a VPN is active. Shieldly offers per-app bypass for them: excluded packages are passed to `Builder.addDisallowedApplication()`, so the system routes their sockets straight out and never reports a VPN network to them.
+
+The cost is stated plainly: an excluded app is **not filtered at all**. Its lookups go to the device's normal resolver, so ads, trackers and malware domains reach it unblocked. Bypass is a compatibility switch, not a privacy mode.
+
+Entries survive an uninstall and reinstall of the excluded app, and a package that has been removed is skipped when the tunnel is rebuilt rather than failing the whole tunnel.
+
 ## Facebook sponsored-post hider (Phase 8b, experimental)
 
 Implemented: accessibility service, pure-Kotlin detector, a direct press of

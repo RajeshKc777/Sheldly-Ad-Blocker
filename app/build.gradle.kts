@@ -14,9 +14,9 @@ android {
         applicationId = "com.sentinel.adblock"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
+        versionCode = 2
         // CI overrides this on a release build: -Papp.versionName=1.0.0
-        versionName = providers.gradleProperty("app.versionName").orElse("0.1.0").get()
+        versionName = providers.gradleProperty("app.versionName").orElse("0.2.0").get()
     }
 
     buildTypes {

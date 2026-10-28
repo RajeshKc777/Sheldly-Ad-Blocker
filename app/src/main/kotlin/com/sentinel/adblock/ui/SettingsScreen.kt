@@ -7,12 +7,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -27,9 +31,11 @@ fun SettingsScreen(
     blocklist: FilterSnapshot,
     status: ProtectionState.Status,
     onUpstream: (SettingsRepository.Upstream) -> Unit,
+    onExcludedApps: (Set<String>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    var showExceptions by remember { mutableStateOf(false) }
     val versionName = remember {
         runCatching {
             context.packageManager.getPackageInfo(context.packageName, 0).versionName
@@ -92,6 +98,30 @@ fun SettingsScreen(
 
         item {
             FacebookHidingCard()
+        }
+
+        item {
+            SectionCard(title = "Apps that bypass the filter") {
+                Text(
+                    text = "Banking and payment apps often refuse to run while a VPN " +
+                        "is active. Apps excluded here send their traffic straight out " +
+                        "through your normal connection, so they never see a VPN — and " +
+                        "their own ads are not filtered either. Protection restarts " +
+                        "automatically when you change this list.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                KeyValueRow("Excluded apps", settings.excludedApps.size.grouped())
+                Button(
+                    onClick = { showExceptions = true },
+                    modifier = Modifier.padding(top = 8.dp),
+                ) {
+                    Text(
+                        text = if (settings.excludedApps.isEmpty()) "Choose apps"
+                        else "Change apps",
+                    )
+                }
+            }
         }
 
         item {
@@ -171,5 +201,13 @@ fun SettingsScreen(
                 )
             }
         }
+    }
+
+    if (showExceptions) {
+        AppExceptionsDialog(
+            excluded = settings.excludedApps,
+            onDismiss = { showExceptions = false },
+            onApply = onExcludedApps,
+        )
     }
 }
