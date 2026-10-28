@@ -48,6 +48,10 @@ The cost is stated plainly: an excluded app is **not filtered at all**. Its look
 Entries survive an uninstall and reinstall of the excluded app, and a package that has been removed is skipped when the tunnel is rebuilt rather than failing the whole tunnel.
 
 ## Facebook sponsored-post hider (Phase 8b, experimental)
+### The in-app switch cannot enable the service
+
+Enabling an AccessibilityService is a system action. The per-service toggle page is protected by `android.permission.OPEN_ACCESSIBILITY_DETAILS_SETTINGS`, held by system apps only — verified on MIUI (Android 11) and AOSP 16, where launching it from Shieldly throws `SecurityException`. Shieldly therefore opens the Accessibility list and states which entry to tap. Nothing in the app can flip that switch, and no build can change that without a system signature.
+
 
 Implemented: accessibility service, pure-Kotlin detector, a direct press of
 Facebook's own `Hide Ad` button, session counter, disclosure, and label/control

@@ -137,6 +137,14 @@ available as a workflow artifact:
 | 4 | Rules tab | Add your own allow/block rules, or test any domain with the checker |
 | 5 | Settings tab | Choose the upstream resolver; enable the experimental Facebook hider if you want it |
 | 6 | Any time | Toggle protection off — the tunnel closes and all counters reset |
+| 7 | Settings → Facebook sponsored posts | The hider is an accessibility service, not part of the tunnel: it keeps working with Protection **off**. It and the per-app bypass are independent of each other |
+
+Two independent layers, and either can run without the other:
+
+- **Protection (VPN)** — answers DNS for the whole device and refuses ad, tracker and malware domains. Needs the VPN consent and the dashboard switch.
+- **Facebook sponsored-post hider** — an accessibility service that presses Facebook's own `Hide Ad` button. Facebook only, and it needs **no VPN**.
+
+Protection cannot hide Facebook sponsored posts by itself: they are served from `facebook.com`, and blocking that host would break the app. That is exactly why the hider exists.
 
 Turning protection off (or uninstalling the app) immediately releases the VPN, so normal DNS resumes. There is nothing to disable in system settings for the DNS layer.
 

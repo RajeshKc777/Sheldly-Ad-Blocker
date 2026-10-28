@@ -264,11 +264,14 @@ private fun ProtectionHero(status: ProtectionState.Status, onToggle: (Boolean) -
                 Text(
                     text = when (status.phase) {
                         ProtectionState.Phase.RUNNING ->
-                            "Filtering every DNS lookup this device makes."
+                            "Ad, tracker and malware domains are refused for every app " +
+                                "on this device. Facebook sponsored posts are handled " +
+                                "separately, without the VPN."
                         ProtectionState.Phase.STARTING -> "Waiting for the tunnel to come up."
                         ProtectionState.Phase.ERROR -> "The tunnel stopped. See the error below."
                         ProtectionState.Phase.STOPPED ->
-                            "Turn this on to filter DNS lookups on this device."
+                            "Turn this on to refuse ad, tracker and malware domains for " +
+                                "every app on this device."
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = subtle,

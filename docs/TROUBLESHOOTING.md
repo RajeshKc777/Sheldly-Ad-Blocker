@@ -35,6 +35,7 @@ reboot needed.
 | "IPv6 DNS packets seen" grows | IPv6 traffic on a dual-stack network | Expected — counted, not filtered |
 
 ## The Facebook sponsored-post hider
+This layer is independent of Protection: it needs **no VPN** and keeps working with the tunnel off. Tapping the card, the switch or the button all open the service's own page in Accessibility settings, where the single toggle lives.
 
 | Symptom | Cause | Fix |
 |---|---|---|
@@ -42,6 +43,8 @@ reboot needed.
 | Hider silently stops working | Facebook changed its label or layout | Nothing to fix at runtime; this is the documented fragility |
 | An ad stays on screen for a moment before it vanishes | Android draws the post before the accessibility callback reaches Shieldly; the fast path presses `Hide Ad` as soon as the changed node is visible | Expected and bounded; no accessibility app can act before the first frame |
 | An ad is never removed | That build shows no `Hide Ad` button, or the control was renamed | Add the new control name as `hide_control=` in `assets/cosmetic/facebook_rules.txt` and rebuild |
+| Tapping the card does nothing | Builds before 0.2.0 only made the small switch tappable | Update to 0.2.0: the whole card and the **Enable in Accessibility settings** button now open the service page |
+| Tapping the card opens Accessibility, not the Shieldly switch | Android keeps a service's own toggle page system-only (`OPEN_ACCESSIBILITY_DETAILS_SETTINGS` is a signature permission), so no installed app can open it | Under **Downloaded apps** tap **Shieldly sponsored-post hider**. The in-app switch updates when you come back |
 | The same advertiser appears again in a later session | Facebook can serve the same advertiser again; hiding a post is not a block | Nothing to fix — the service hides what is on screen |
 | Ads in Reels/Stories/Marketplace still show | Out of scope by design (labelled feed posts only) | See [LIMITATIONS.md](LIMITATIONS.md) |
 | MIUI kills the hider | Battery optimisation | Autostart **on**, battery saver **No restrictions** for Shieldly |

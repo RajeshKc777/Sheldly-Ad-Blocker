@@ -61,6 +61,22 @@ Because it is installed outside the Play Store. Sideloaded APKs get the
 **Allow restricted settings** once. Only install APKs from this repo's official
 Releases page. → [GETTING_STARTED.md](GETTING_STARTED.md)
 
+## Do I need Protection (the VPN) on for the Facebook hider?
+
+No. They are two independent layers that solve different problems.
+
+| | Protection (VPN) | Facebook sponsored-post hider |
+|---|---|---|
+| Switched on in | Shieldly's dashboard | Android Settings → Accessibility |
+| Needs VPN consent | Yes | **No** |
+| What it does | Answers DNS for the whole device, replying `NXDOMAIN` for ad, tracker and malware domains | Presses Facebook's own `Hide Ad` button on posts Facebook labels as ads |
+| Where it applies | Every app: browsers, games, in-app browsers | Facebook (Katana) only; Facebook Lite exposes no text to accessibility |
+| Works with the other layer off | Yes | Yes |
+
+So the hider keeps removing Facebook ads with Protection off. What you give up with Protection off is domain blocking everywhere else — other apps, browsers, trackers.
+
+The reverse is not possible: Protection cannot remove Facebook sponsored posts, because they are served by `facebook.com` itself and blocking that host would break the app.
+
 ## Facebook hider: is my screen content logged?
 
 No. The service reads the accessibility tree to find posts Facebook itself

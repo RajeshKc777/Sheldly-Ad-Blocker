@@ -1,11 +1,13 @@
 package com.sentinel.adblock.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -51,19 +53,42 @@ fun FacebookHidingCard(modifier: Modifier = Modifier) {
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    SectionCard(title = "Facebook sponsored posts", modifier = modifier) {
+    /**
+     * The only thing this screen can do is send the user to the system page, so
+     * the card body, the switch and the button all end up there instead of
+     * doing nothing. Turning it on goes through the disclosure first.
+     */
+    fun openSystemSwitch() {
+        if (enabled) {
+            FacebookHiding.openSettings(context)
+        } else {
+            showDisclosure = true
+        }
+    }
+
+    SectionCard(
+        title = "Facebook sponsored posts",
+        modifier = modifier.clickable(onClick = ::openSystemSwitch),
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = if (enabled) "On in Accessibility settings" else "Off — tap to open the system switch",
+                    text = if (enabled) "On in Accessibility settings"
+                    else "Off — tap here to open the system switch",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = "Hides posts Facebook labels as ads by pressing Facebook's own " +
-                        "Hide Ad button: Facebook removes the post, so nothing is drawn " +
-                        "over the feed. Experimental: it breaks when Facebook changes its " +
-                        "layout.",
+                    text = "Independent of Protection: this works with the VPN off. " +
+                        "Protection blocks domains by DNS; this presses Facebook's own " +
+                        "Hide Ad button on posts Facebook labels as ads, so Facebook " +
+                        "removes them and nothing is drawn over the feed.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 2.dp),
+                )
+                Text(
+                    text = "Experimental: it breaks when Facebook changes its layout.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 2.dp),
@@ -89,6 +114,16 @@ fun FacebookHidingCard(modifier: Modifier = Modifier) {
             )
         }
 
+        OutlinedButton(
+            onClick = ::openSystemSwitch,
+            modifier = Modifier.padding(top = 10.dp),
+        ) {
+            Text(
+                if (enabled) "Open the system switch"
+                else "Enable in Accessibility settings",
+            )
+        }
+
         if (!rulesUsable) {
             Text(
                 text = "The detection rule file is missing or empty, so nothing would be " +
@@ -100,11 +135,10 @@ fun FacebookHidingCard(modifier: Modifier = Modifier) {
         }
 
         Text(
-            text = "Shieldly presses Facebook's own Hide Ad button: Facebook removes the " +
-                "post and closes the gap in the feed, so no block or overlay is drawn " +
-                "over it. An ad that offers no such button is left alone rather than " +
-                "covered. Android requires you to confirm this in system settings, so the " +
-                "switch opens Accessibility settings rather than turning anything on itself.",
+            text = "Android keeps a service's own toggle page system-only, so Shieldly can " +
+                "open Accessibility but cannot flip the switch for you. Under " +
+                "\u201CDownloaded apps\u201D tap \u201CShieldly sponsored-post hider\u201D and " +
+                "turn it on, then come back: the switch above updates by itself.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 8.dp),

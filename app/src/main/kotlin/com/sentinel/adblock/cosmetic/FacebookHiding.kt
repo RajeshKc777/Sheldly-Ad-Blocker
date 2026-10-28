@@ -35,10 +35,13 @@ object FacebookHiding {
 
     /** Opens the system screen where the user can enable or disable the service.
      *
-     * Prefers the service's own details page (one switch, no hunting through the
-     * list of every accessibility service). That page is addressed by the
-     * platform-internal action string because the constant is not part of the
-     * public SDK; every fallback path still lands on a usable system screen.
+     * Measured on MIUI (Android 11) and AOSP 16: the per-service details page
+     * (`Settings$AccessibilityDetailsSettingsActivity`) is guarded by
+     * `android.permission.OPEN_ACCESSIBILITY_DETAILS_SETTINGS`, which is held by
+     * system apps only — launching it from here throws SecurityException. So the
+     * attempt is kept (some OEM builds honour it) and the fallback is the real
+     * path: the Accessibility list, where the service is one tap away under
+     * "Downloaded apps". Nothing in-app can flip that switch.
      */
     fun openSettings(context: Context) {
         val component = android.content.ComponentName(context, FacebookAdHiderService::class.java)

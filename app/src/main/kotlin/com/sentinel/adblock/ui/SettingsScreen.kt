@@ -48,6 +48,37 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
+            SectionCard(title = "What Protection does") {
+                Text(
+                    text = "Protection asks Android for a local VPN and answers DNS for " +
+                        "the whole device. When any app asks where an ad, tracker or " +
+                        "known malware domain lives, Shieldly replies NXDOMAIN, so the " +
+                        "connection is never opened. It covers browsers, in-app " +
+                        "browsers, games and other apps alike.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = "It does not inspect traffic, decrypt HTTPS, or look inside a " +
+                        "page. It also cannot remove Facebook sponsored posts: those are " +
+                        "served by facebook.com itself, which has to stay reachable for " +
+                        "the app to work. That is what the sponsored-post hider is for, " +
+                        "and it runs without the VPN.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+                Text(
+                    text = "Apps that refuse to run behind a VPN — banking, wallets — can " +
+                        "be excluded further down. Their traffic then leaves unfiltered.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+        }
+
+        item {
             SectionCard(title = "Upstream DNS resolver") {
                 Text(
                     text = "Queries that are not blocked are forwarded to this resolver " +
@@ -193,8 +224,9 @@ fun SettingsScreen(
                     modifier = Modifier.padding(top = 4.dp),
                 )
                 Text(
-                    text = "Shieldly filters DNS locally on this device. It does not " +
-                        "decrypt HTTPS traffic or remove content from inside a page.",
+                    text = "Shieldly filters DNS locally on this device and never decrypts " +
+                        "HTTPS. The optional Facebook hider reads the Facebook feed's " +
+                        "accessibility tree to press Hide Ad, and only while it is on.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 14.dp),
