@@ -49,7 +49,7 @@ resolver.query(payload)   protected UDP socket to upstream:53
    └─ answer ────► patch ID, min TTL → cache, reply
 ```
 
-Every branch returns an `Outcome` that feeds exactly one counter — which is why
+Every branch returns an `Outcome` that feeds exactly one counter, which is why
 the Stats screen's numbers are trustworthy.
 
 ## 3. Domain matching rules (`filtering/`)
@@ -61,7 +61,7 @@ the Stats screen's numbers are trustworthy.
 | `0.0.0.0 example.com` | hosts syntax | same as above |
 | `@@example.com` | exception | allow rule |
 | `1.2.3.4` | bare IP | rejected (invalid host name) |
-| `##selector` / `$modifier` | cosmetic / modifier | **rejected as unsupported** — counted, not silently ignored |
+| `##selector` / `$modifier` | cosmetic / modifier | **rejected as unsupported**, counted rather than silently ignored |
 
 **Precedence:** allow rules beat deny rules, deny rules beat the bundled list.
 Normalisation lowercases, strips a trailing dot, punycodes non-ASCII names, and
@@ -80,7 +80,7 @@ rejects invalid hosts before matching.
   Quad9 `9.9.9.9`, AdGuard `94.140.14.14` by default in the UI).
 - The socket is `protect()`ed via `SocketProtector` so the query does **not** loop
   back into the tunnel.
-- Response is truncated (TC=1) if it would exceed the MTU — a real behaviour some
+- Response is truncated (TC=1) if it would exceed the MTU, a real behaviour some
   resolvers rely on; oversized UDP answers are silently lost otherwise.
 - Timeout → `SERVFAIL`, not silence.
 
@@ -91,7 +91,7 @@ rejects invalid hosts before matching.
 | Ads and content on one domain (`cdn.news.com`) | Matching happens per *name*; both lookups are identical |
 | App hard-codes its DNS (e.g. `8.8.8.8` inside the app) | The query never goes to the system resolver → never enters the tunnel |
 | **DNS-over-HTTPS (DoH)** inside a browser | The lookup itself is HTTPS to `1.1.1.1`/`dns.google` → bypasses |
-| **Android Private DNS (DoT)** | Same — the system resolver is bypassed |
+| **Android Private DNS (DoT)** | Same: the system resolver is bypassed |
 | IPv6 | This tunnel routes one IPv4 address only; IPv6 datagrams seen in the TUN are **counted, then dropped** (they are not expected to exist there) |
 | QUIC/HTTP-3 traffic | Not DNS; never reaches the process at all |
 

@@ -17,7 +17,7 @@ import com.sentinel.core.filtering.RuleParser
  * reference and answer packets without any further indirection.
  *
  * Precedence, in order:
- *  1. the user's own rules (allow *and* deny) — explicit intent beats any list;
+ *  1. the user's own rules (allow *and* deny), because explicit intent beats any list;
  *  2. downloaded/bundled lists, where `@@` exceptions beat block rules;
  *  3. no match -> query is forwarded.
  */

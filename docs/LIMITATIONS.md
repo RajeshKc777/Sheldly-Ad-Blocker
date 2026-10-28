@@ -50,7 +50,7 @@ Entries survive an uninstall and reinstall of the excluded app, and a package th
 ## Facebook sponsored-post hider (Phase 8b, experimental)
 ### The in-app switch cannot enable the service
 
-Enabling an AccessibilityService is a system action. The per-service toggle page is protected by `android.permission.OPEN_ACCESSIBILITY_DETAILS_SETTINGS`, held by system apps only — verified on MIUI (Android 11) and AOSP 16, where launching it from Shieldly throws `SecurityException`. Shieldly therefore opens the Accessibility list and states which entry to tap. Nothing in the app can flip that switch, and no build can change that without a system signature.
+Enabling an AccessibilityService is a system action. The per-service toggle page is protected by `android.permission.OPEN_ACCESSIBILITY_DETAILS_SETTINGS`, held by system apps only, verified on MIUI (Android 11) and AOSP 16, where launching it from Shieldly throws `SecurityException`. Shieldly therefore opens the Accessibility list and states which entry to tap. Nothing in the app can flip that switch, and no build can change that without a system signature.
 
 
 Implemented: accessibility service, pure-Kotlin detector, a direct press of
@@ -92,7 +92,7 @@ Fragile by nature:
   debounce.
 - **A preloaded ad can be pressed before it scrolls in.** Facebook binds the next
   post before it is visible, and the service does not require the button to be
-  on screen, so such an ad can be removed while it is still below the fold — the
+  on screen, so such an ad can be removed while it is still below the fold, so the
   user never sees it. If the platform rejects that press, the post stays visible
   when it does scroll in; nothing is drawn over it.
 - **Pressing `Hide Ad` is an action inside Facebook, not a local hide.** It is

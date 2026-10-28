@@ -29,7 +29,7 @@ list becomes possible the moment the updater is wired to the UI.
 | `/banner/ad.png` | path → unsupported |
 | `/regex/` or `$script` | regex / modifier → unsupported |
 
-Everything unsupported is **reported, not dropped silently** — the Settings
+Everything unsupported is **reported, not dropped silently**: the Settings
 "Filter build" card shows accepted / duplicates / unsupported / invalid counts so
 the rule number stays trustworthy.
 
@@ -47,7 +47,7 @@ the rule number stays trustworthy.
 1. **Rules** tab → *Add a rule*.
 2. Type a domain (`example.com`, no paths).
 3. Choose **Allow** (fix over-blocking) or **Block** (extend the list).
-4. Not sure what would happen? Use *Check a domain* — it prints the exact rule
+4. Not sure what would happen? Use *Check a domain*; it prints the exact rule
    and source that would match, using the same immutable snapshot the DNS path uses.
 
 Rules survive restarts (they are the only data written to disk besides the
@@ -63,7 +63,7 @@ The updater separates **fetch → validate → build → swap**:
 2. **Validate:** not empty, ≤ 800k lines, ≥ 1 usable rule, and a warning if >90%
    of lines were unsupported (a sign you grabbed a browser-only list).
 3. **Build:** the parser produces a compiled snapshot; failures here abort.
-4. **Swap:** `BlocklistRepository.current` is replaced atomically — a DNS query in
+4. **Swap:** `BlocklistRepository.current` is replaced atomically: a DNS query in
    flight finishes against the old snapshot; the next query sees the new one.
 
 A failed download changes nothing: the previous list stays active. That is the
@@ -75,6 +75,6 @@ design contract of `BlocklistUpdater` and it is covered by
 - No UI to paste a URL and update from the internet.
 - No schedule, no "check daily", no diffing, no mirror fallback.
 - No disk cache of downloaded lists (a restart would re-download).
-- No automatic trust evaluation beyond the size/format limits above — treat
+- No automatic trust evaluation beyond the size/format limits above; treat
   third-party list sources as supply-chain inputs, the way you would treat
   third-party dependencies.

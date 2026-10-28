@@ -7,8 +7,8 @@ package com.sentinel.core.cosmetic
  *
  * Facebook renders its own label (`Ad`, `Sponsored`, …) as a small text node in
  * the post header. The detector looks for a node whose text *starts with* one
- * of the configured labels, then walks up to the nearest repeatable container —
- * normally the RecyclerView item, which is exactly one post — and returns its
+ * of the configured labels, then walks up to the nearest repeatable container, normally the RecyclerView item, which is exactly
+ * one post, and returns its
  * bounds. It never looks at post content, never guesses from an image, and
  * never hides anything it cannot explain.
  *

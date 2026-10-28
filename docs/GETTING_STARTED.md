@@ -1,6 +1,6 @@
 # Getting started with Shieldly
 
-A complete beginner's guide — no Android or networking knowledge assumed.
+A complete beginner's guide. No Android or networking knowledge is assumed.
 Every technical term is explained the first time it appears.
 
 ---
@@ -10,13 +10,13 @@ Every technical term is explained the first time it appears.
 | Thing | Minimum |
 |---|---|
 | A phone or tablet | Android **8.0** (API 26) or newer |
-| The APK | From the [releases page](https://github.com/RajeshKc777/Sheldly-Ad-Blocker/releases/latest) — file named like `Shieldly-1.0.0-debug.apk` |
+| The APK | From the [releases page](https://github.com/RajeshKc777/Sheldly-Ad-Blocker/releases/latest), with a file named like `Shieldly-1.0.0-debug.apk` |
 | Free storage | ~50 MB |
 | Nothing else | No account, no sign-up, no server |
 
 ## 2. Installing the APK
 
-An **APK** is the file format Android uses to install apps — the same thing the
+An **APK** is the file format Android uses to install apps, the same thing the
 Play Store installs for you, except here you hand the file to Android directly.
 
 1. Copy or download the APK onto the phone.
@@ -34,7 +34,7 @@ Play Store installs for you, except here you hand the file to Android directly.
 
 1. On the **Dashboard**, flip the switch.
 2. Android asks *"Shieldly wants to set up a VPN connection. It can monitor
-   network traffic…"* — tap **OK**.
+   network traffic…"*. Tap **OK**.
    This dialog is the one permission that matters. A **local VPN** means the app
    creates a network doorway on the device itself; no data is sent to a VPN
    company, and Shieldly has no server. See
@@ -47,7 +47,7 @@ Play Store installs for you, except here you hand the file to Android directly.
 - The **Dashboard** shows how many DNS lookups were seen and how many were
   blocked. Blocked domains are listed under *Recent blocked lookups*.
 - The bundled starter list is deliberately small (49 rules), so do not expect
-  dramatic numbers yet — it exists to prove the pipeline, not to replace EasyList.
+  dramatic numbers yet; it exists to prove the pipeline, not to replace EasyList.
 - Nothing is configured anywhere else on the phone; Shieldly sets itself as the
   DNS resolver only while protection is running.
 
@@ -63,7 +63,7 @@ Play Store installs for you, except here you hand the file to Android directly.
 
 ## 6. Uninstalling
 
-Uninstall like any app. The tunnel is released the moment the app is removed —
+Uninstall like any app. The tunnel is released the moment the app is removed;
 nothing remains on the phone except, on Android 8–10, a "VPN app" entry that
 Android cleans up automatically.
 

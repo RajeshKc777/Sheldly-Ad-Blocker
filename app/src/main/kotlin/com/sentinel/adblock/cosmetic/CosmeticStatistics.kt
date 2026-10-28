@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.update
  * them would let one number imply the other. Nothing here is persisted, so a
  * force-stop erases it.
  *
- * The dedupe set stores a label plus a rectangle — never post text, author
+ * The dedupe set stores a label plus a rectangle, never post text, author
  * names, or anything else read from the screen.
  */
 object CosmeticStatistics {

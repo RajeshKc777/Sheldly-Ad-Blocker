@@ -78,7 +78,7 @@ fun StatisticsScreen(
                 KeyValueRow("Blocked share", percentOf(counters.blocked, counters.total))
                 KeyValueRow(
                     "Running since",
-                    if (status.sinceMillis > 0L) formatTime(status.sinceMillis) else "–",
+                    if (status.sinceMillis > 0L) formatTime(status.sinceMillis) else "not running",
                 )
             }
         }

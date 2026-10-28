@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * ## What it actually does
  *
- * The tunnel is deliberately *narrow*. Only one address is routed into it — a
+ * The tunnel is deliberately *narrow*. Only one address is routed into it: a
  * fake DNS server (`10.111.222.1`) that is also handed to the system as the
  * device's resolver. Every other packet, on every other port, keeps using the
  * device's real network and never enters this process.

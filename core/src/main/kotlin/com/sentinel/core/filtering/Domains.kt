@@ -7,8 +7,8 @@ import java.util.Locale
  * Normalisation and validation for the only identifier this project filters on:
  * DNS host names.
  *
- * Every path funnels through [normalize] — the DNS packet parser, the rule
- * parser and the user-facing allowlist editor — so that `Example.COM.`,
+ * Every path funnels through [normalize]: the DNS packet parser, the rule
+ * parser and the user-facing allowlist editor, so that `Example.COM.`,
  * `example.com` and a rule-file entry `example.com` are the same key.
  *
  * Design notes:

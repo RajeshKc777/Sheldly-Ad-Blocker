@@ -47,14 +47,14 @@ Key facts:
 |---|---|---|---|
 | Accessibility overlay cover | Yes for Katana | Covers are in screen space, must be re-drawn after scroll, and leave a visible block | **Rejected (removed 2026-10-26)** |
 | `ACTION_SCROLL_FORWARD` to skip the post | Probably | Moves the user's reading position; can trigger more feed loading; jarring on fast scroll | Rejected |
-| Auto-click Facebook's "Hide Ad" | Yes — it is a direct one-click button on the tested build | Performs an action inside another app and reports a preference to Facebook; brittle | **Chosen (2026-10-26)** |
+| Auto-click Facebook's "Hide Ad" | Yes, it is a direct one-click button on the tested build | Performs an action inside another app and reports a preference to Facebook; brittle | **Chosen (2026-10-26)** |
 | Screenshot + OCR | Would work on Lite | Needs screen capture, processes post content, slow, battery-heavy | Rejected |
 | Modify Facebook's views | No | Not possible across processes | Rejected |
 
 ## Chosen method
 
 > **Update (2026-10-26).** The tested build exposes a direct, one-click
-> `Hide Ad` button in a sponsored post's header — it sits next to "More
+> `Hide Ad` button in a sponsored post's header: it sits next to "More
 > options", is `clickable=true`, and opens no menu. The decision therefore
 > changed: the service presses that button, and nothing is drawn over the feed.
 > The press is a real action inside Facebook, so it is opt-in, disclosed, and
@@ -66,7 +66,7 @@ Key facts:
   short header label against a replaceable label list, then walk up to the
   nearest ancestor that is still one post, stopping at `RecyclerView`.
 - **Hiding**: press the `Hide Ad` button inside that post (Facebook removes the
-  post and reflows the feed). A post without that button is left alone — no
+  post and reflows the feed). A post without that button is left alone, with no
   overlay, no blank block.
 - **Why**: the press leaves no trace and needs no scroll movement. The cost is a
   brief first draw that no accessibility app can pre-empt, and a preference

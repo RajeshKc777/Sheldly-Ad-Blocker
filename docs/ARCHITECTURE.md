@@ -48,7 +48,7 @@ therefore testable on a laptop without an emulator.
 ```mermaid
 flowchart LR
     subgraph APP[":app (Android)"]
-        UI["ui/ — Compose screens<br/>Dashboard · Rules · Stats · Settings"]
+        UI["ui/ - Compose screens<br/>Dashboard · Rules · Stats · Settings"]
         VM["SentinelViewModel"]
         CTRL["VpnController"]
         SVC["AdBlockVpnService"]
@@ -118,7 +118,7 @@ sequenceDiagram
     alt validation failed
         V-->>UP: rejected (empty / too large / no usable rules)
         UP-->>U: UpdateResult.Rejected(reason)
-        Note over U,R: current list stays active — nothing is installed
+        Note over U,R: current list stays active; nothing is installed
     else validation passed
         UP-->>U: UpdateResult.Accepted(RuleSource, ruleCount, warnings)
         U->>E: rebuild(sources)
@@ -174,6 +174,6 @@ Behaviour details:
 | `sentinel-cosmetic` | Accessibility tree walking (Facebook hider) |
 | Main thread | UI only; never does file or network I/O |
 
-The reader thread performs no DNS work itself — it parses the packet, hands the
+The reader thread performs no DNS work itself: it parses the packet, hands the
 payload to the pool, and continues reading. That is what keeps the tunnel from
 falling behind during a burst of lookups.

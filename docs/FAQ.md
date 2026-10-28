@@ -15,7 +15,7 @@ internet, untouched. → [HOW_IT_WORKS.md](HOW_IT_WORKS.md)
 ## What does Shieldly see about my browsing?
 
 Only the **domain names** of DNS lookups that pass through the tunnel while
-protection is on — and those are processed in memory, counted, and discarded.
+protection is on, and those are processed in memory, counted, and discarded.
 No browsing history, no content, no metadata is stored or transmitted. The
 app's only network conversation is with the DNS resolver you chose. →
 [SECURITY.md](SECURITY.md)
@@ -23,7 +23,7 @@ app's only network conversation is with the DNS resolver you chose. →
 ## Does it block ads in YouTube / Instagram / games?
 
 Mostly no. Those services serve ads from the same domains as their content or
-from per-app CDNs — DNS cannot separate them. What DNS blocking *does* stop is
+from per-app CDNs, and DNS cannot separate them. What DNS blocking *does* stop is
 any app talking to a known ad/tracker **domain** in the bundled list. →
 [LIMITATIONS.md](LIMITATIONS.md)
 
@@ -45,7 +45,7 @@ unit-tested; wiring it into the UI is the top roadmap item. →
 
 The tunnel only receives DNS-sized packets (a few hundred bytes each) and does
 one hash lookup per query. Your other traffic does not pass through the
-process. Formal cross-device battery measurements have not been published —
+process. Formal cross-device battery measurements have not been published;
 that is stated rather than claimed. → [README: Performance](../README.md#-performance-and-battery)
 
 ## Is it on the Play Store?
@@ -73,7 +73,7 @@ No. They are two independent layers that solve different problems.
 | Where it applies | Every app: browsers, games, in-app browsers | Facebook (Katana) only; Facebook Lite exposes no text to accessibility |
 | Works with the other layer off | Yes | Yes |
 
-So the hider keeps removing Facebook ads with Protection off. What you give up with Protection off is domain blocking everywhere else — other apps, browsers, trackers.
+So the hider keeps removing Facebook ads with Protection off. What you give up with Protection off is domain blocking everywhere else: other apps, browsers, trackers.
 
 The reverse is not possible: Protection cannot remove Facebook sponsored posts, because they are served by `facebook.com` itself and blocking that host would break the app.
 
@@ -94,7 +94,7 @@ closes at once and Android's normal resolver returns. No reboot is needed. →
 
 ## Can I use it together with another VPN app?
 
-No — Android allows one VPN at a time, and enabling another app's VPN revokes
+No. Android allows one VPN at a time, and enabling another app's VPN revokes
 Shieldly's tunnel (you will see the "protection stopped" banner). →
 [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 
@@ -102,7 +102,7 @@ Shieldly's tunnel (you will see the "protection stopped" banner). →
 
 The app was developed under the working name Sentinel; the user-facing name was
 changed to Shieldly shortly before release. Package identifiers were kept so
-updates install in place. Internal log tags still say `sentinel` — that is
+updates install in place. Internal log tags still say `sentinel`, which is
 cosmetic, not a different product.
 
 ## A banking app says "VPN detected" and refuses to run. What now?

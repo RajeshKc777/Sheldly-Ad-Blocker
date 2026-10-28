@@ -38,7 +38,7 @@ object FacebookHiding {
      * Measured on MIUI (Android 11) and AOSP 16: the per-service details page
      * (`Settings$AccessibilityDetailsSettingsActivity`) is guarded by
      * `android.permission.OPEN_ACCESSIBILITY_DETAILS_SETTINGS`, which is held by
-     * system apps only — launching it from here throws SecurityException. So the
+     * system apps only, so launching it from here throws SecurityException. So the
      * attempt is kept (some OEM builds honour it) and the fallback is the real
      * path: the Accessibility list, where the service is one tap away under
      * "Downloaded apps". Nothing in-app can flip that switch.

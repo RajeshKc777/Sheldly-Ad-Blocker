@@ -23,8 +23,8 @@ tag push v*.*.*     ─►  release job (needs: build):
 - On a **version tag** the APK is published as a **GitHub Release asset**, which
   is the permanent download link the README points to
   (`…/releases/latest` resolves to the newest release).
-- The release job has `permissions: contents: write` — the least privilege that
-  allows creating a release — while the rest of the pipeline runs with
+- The release job has `permissions: contents: write`, the least privilege that
+  allows creating a release, while the rest of the pipeline runs with
   `contents: read`.
 - If tests fail or the APK is missing, the release step never runs.
 
@@ -54,7 +54,7 @@ gh release download v1.0.0 -p '*.apk' -D ./
 ## 4. What is published today
 
 A **debug-signed** APK. It is fully functional and installable, but it is not a
-release-signed Play-style build. That is stated in the README — no overclaim.
+release-signed Play-style build. That is stated in the README, with no overclaim.
 
 ## 5. Production signing (when you are ready)
 
@@ -101,7 +101,7 @@ Never commit a keystore. Use GitHub Actions **secrets**:
    debug APK as a secondary asset for testers.
 
 **Secrets hygiene:** secrets never appear in logs or source; rotate the keystore
-password if it was ever exposed; back the `.jks` up offline — losing it means
+password if it was ever exposed; back the `.jks` up offline; losing it means
 losing the ability to ship updates under the same app identity.
 
 ## 6. Version numbering

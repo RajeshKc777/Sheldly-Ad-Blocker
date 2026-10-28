@@ -28,12 +28,12 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.sentinel.adblock.cosmetic.FacebookHiding
 
 /**
- * Disclosure + entry point for the experimental Facebook hider.
+ * Entry point for the experimental Facebook hider.
  *
- * There is no way for an app to enable its own AccessibilityService, and this
- * screen does not pretend otherwise: the switch opens a plain-language
- * disclosure, then the system's Accessibility settings, where the user makes
- * the actual decision.
+ * There is no way for an app to enable its own AccessibilityService, so nothing
+ * on this card pretends to be a real switch: the card body, the switch itself
+ * and the button all open the system screen where the toggle lives. The switch
+ * mirrors the system state and never flips locally.
  */
 @Composable
 fun FacebookHidingCard(modifier: Modifier = Modifier) {
@@ -55,15 +55,13 @@ fun FacebookHidingCard(modifier: Modifier = Modifier) {
 
     /**
      * The only thing this screen can do is send the user to the system page, so
-     * the card body, the switch and the button all end up there instead of
-     * doing nothing. Turning it on goes through the disclosure first.
+     * the card body, the switch and the button all do the same thing: open the
+     * system screen where the toggle actually lives. The switch is deliberately
+     * not a local on/off state: Android owns that bit, and faking it here would
+     * let the UI say "on" while nothing runs.
      */
     fun openSystemSwitch() {
-        if (enabled) {
-            FacebookHiding.openSettings(context)
-        } else {
-            showDisclosure = true
-        }
+        FacebookHiding.openSettings(context)
     }
 
     SectionCard(
@@ -74,7 +72,7 @@ fun FacebookHidingCard(modifier: Modifier = Modifier) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = if (enabled) "On in Accessibility settings"
-                    else "Off — tap here to open the system switch",
+                    else "Off. Tap to open the system switch",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -103,14 +101,9 @@ fun FacebookHidingCard(modifier: Modifier = Modifier) {
             }
             Switch(
                 checked = enabled,
-                onCheckedChange = { want ->
-                    if (want) {
-                        showDisclosure = true
-                    } else {
-                        // Disabling is also a system action; there is no API to revoke it.
-                        FacebookHiding.openSettings(context)
-                    }
-                },
+                // Same action as the button and the card: this row never changes
+                // the switch locally, because only Android can grant the service.
+                onCheckedChange = { openSystemSwitch() },
             )
         }
 
@@ -122,6 +115,18 @@ fun FacebookHidingCard(modifier: Modifier = Modifier) {
                 if (enabled) "Open the system switch"
                 else "Enable in Accessibility settings",
             )
+        }
+
+        TextButton(
+            onClick = { showDisclosure = true },
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                start = 0.dp,
+                end = 8.dp,
+                top = 4.dp,
+                bottom = 0.dp,
+            ),
+        ) {
+            Text("What it can see on screen")
         }
 
         if (!rulesUsable) {

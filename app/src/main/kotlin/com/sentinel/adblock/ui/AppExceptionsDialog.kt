@@ -53,7 +53,7 @@ private data class InstalledApp(val packageName: String, val label: String)
  * active, because "VPN present" is treated as a sign of interception. Excluding
  * an app with [android.net.VpnService.Builder.addDisallowedApplication] means
  * its sockets leave through the real network, so it never observes a VPN
- * network — and, by the same token, its ads are not filtered either.
+ * network, and by the same token its ads are not filtered either.
  */
 @Composable
 fun AppExceptionsDialog(
@@ -127,7 +127,7 @@ fun AppExceptionsDialog(
                             it.packageName.contains(query, ignoreCase = true)
                     }
                     Text(
-                        text = "${selected.size.grouped()} excluded · ${filtered.size.grouped()} shown",
+                        text = "${selected.size.grouped()} excluded, ${filtered.size.grouped()} shown",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),

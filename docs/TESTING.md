@@ -43,14 +43,14 @@ Produces `app/build/outputs/apk/debug/app-debug.apk` (~11 MB).
 (`./gradlew test assembleDebug`) on every push and pull request, uploads the
 APK as the **Shieldly-debug-apk** artifact, and publishes it to a GitHub
 Release on a `v*.*.*` tag. If CI is red, the suite is failing on a clean
-machine — treat that as the ground truth rather than your local cache.
+machine; treat that as the ground truth rather than your local cache.
 
 > OneDrive occasionally holds files under `*/build/` open, which makes Gradle
 > fail with `Unable to delete directory ...`. `.\gradlew.bat --stop` followed by
 > deleting `core/build` and `app/build` clears it. It is a file-lock problem, not
 > a build error.
 
-## Phase 8b — Facebook sponsored-post hider
+## Phase 8b: Facebook sponsored-post hider
 
 ### What was inspected (2026-10-26)
 
@@ -69,7 +69,7 @@ both installed. Findings:
 |---|---|
 | The ad label is **`Ad`**, not `Sponsored` | Header node text `Ad•Shared with: Public` (`\u2022` bullet). Zero occurrences of the string `Sponsored` in the dump. |
 | The label is exposed as **both `text` and `content-desc`** | Same node had identical values in both attributes. |
-| The label is a **combined string**, not a standalone word | `Ad•Shared with: Public` — exact-match on `Ad` would fail without splitting on the bullet. |
+| The label is a **combined string**, not a standalone word | `Ad•Shared with: Public`, so an exact match on `Ad` would fail without splitting on the bullet. |
 | A post is **one direct child of the RecyclerView** | RecyclerView had 3 children; the ad post was child 2 at `[0,424][1080,2005]`. |
 | Facebook's own **"Hide Ad"** button exists | Node with `content-desc="Hide Ad"` in the post header. Deliberately not used (see LIMITATIONS.md). |
 | **Facebook Lite exposes no text at all** | 63 nodes, all `com.facebook.lite`, **0 text, 0 content-desc** after a fully loaded feed. Text-based detection cannot work there. |
@@ -110,7 +110,7 @@ results were measured over adb:
 Frame-level timing of the first draw is not measured; it is bounded by the
 accessibility callback plus the fast-path walk, and described in LIMITATIONS.md.
 
-## Manual procedure — Phase 8b on a physical device
+## Manual procedure: Phase 8b on a physical device
 
 1. Install `Shieldly-debug.apk` (pushed to `/sdcard/Download/`), allowing
    "install unknown apps" for the file manager.
@@ -118,7 +118,7 @@ accessibility callback plus the fast-path walk, and described in LIMITATIONS.md.
 3. Read the disclosure, tap **Open Accessibility settings**.
 4. Enable **Shieldly sponsored-post hider**. Accept the system warning.
 5. Open Facebook, scroll until a post shows the `Ad` label.
-   Expected: the post **disappears** and the feed closes the gap — Shieldly
+   Expected: the post **disappears** and the feed closes the gap. Shieldly
    presses the `Hide Ad` button Facebook renders in the post header, so Facebook
    itself removes the post. No block, border or overlay remains.
 6. Return to Shieldly → **Dashboard**. Expected: "Ads hidden on screen"
@@ -127,7 +127,7 @@ accessibility callback plus the fast-path walk, and described in LIMITATIONS.md.
    enters the feed; during a fast fling a newly-entering ad can be visible for a
    fraction of a second before the fast path reaches it.
 8. Open another app (or the home screen) while scrolling. Expected: nothing from
-   Shieldly is visible over any other app — the service draws no windows at all.
+   Shieldly is visible over any other app; the service draws no windows at all.
 9. Turn the service off in Accessibility settings. Expected: no further presses,
    and the counter resets on the next enable.
 
@@ -140,7 +140,7 @@ adb shell dumpsys window windows | findstr /i "AccessibilityOverlay"
 
 The second command must return **nothing**: this build adds no overlay window.
 
-## Manual procedure — DNS layer
+## Manual procedure: DNS layer
 
 Unchanged from Phase 6:
 

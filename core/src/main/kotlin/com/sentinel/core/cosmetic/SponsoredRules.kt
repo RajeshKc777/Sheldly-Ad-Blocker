@@ -11,7 +11,7 @@ import java.util.Locale
  * docs/TESTING.md). Keeping the tokens in a text file means the next change is
  * an asset edit, not a code change.
  *
- * Format — one `key=value` per line, `#` starts a comment:
+ * Format: one `key=value` per line, `#` starts a comment:
  *
  * ```
  * label=Ad

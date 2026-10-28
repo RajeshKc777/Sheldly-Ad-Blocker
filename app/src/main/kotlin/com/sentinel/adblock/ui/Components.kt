@@ -190,7 +190,7 @@ fun Int.grouped(): String = toLong().grouped()
 
 /** Percentage of [total] represented by [part]; "–" when nothing has happened yet. */
 fun percentOf(part: Long, total: Long): String =
-    if (total <= 0L) "–" else "${(part * 100.0 / total).toInt()}%"
+    if (total <= 0L) "0%" else "${(part * 100.0 / total).toInt()}%"
 
 fun formatTime(millis: Long): String =
     SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(millis))

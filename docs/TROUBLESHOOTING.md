@@ -22,7 +22,7 @@ Every symptom below is something the app can actually show. If yours is not here
 | One specific app fails | Over-blocking | **Rules** tab → *Check a domain* with the app's domain → add an **allow** rule → restart protection |
 
 **Emergency escape hatch:** flip protection **off** on the Dashboard (or
-uninstall). The tunnel closes at once and the phone uses its normal DNS — no
+uninstall). The tunnel closes at once and the phone uses its normal DNS, with no
 reboot needed.
 
 ## Counters look wrong
@@ -32,7 +32,7 @@ reboot needed.
 | "DNS queries" stays 0 | The phone's **Private DNS** (Settings → Network → Private DNS) sends lookups over DoT, bypassing the tunnel | Set Private DNS to **Off**/Opportunistic, or accept those lookups are unfiltered |
 | "Blocked" stays 0 on a device full of ads | The bundled list is tiny (49 rules) by design | Expected; real coverage grows when list updating is wired in |
 | A browser shows ads anyway | Browsers use **DNS-over-HTTPS** by default; their lookups bypass system DNS | Expected (see [LIMITATIONS.md](LIMITATIONS.md)) |
-| "IPv6 DNS packets seen" grows | IPv6 traffic on a dual-stack network | Expected — counted, not filtered |
+| "IPv6 DNS packets seen" grows | IPv6 traffic on a dual-stack network | Expected: counted, not filtered |
 
 ## The Facebook sponsored-post hider
 This layer is independent of Protection: it needs **no VPN** and keeps working with the tunnel off. Tapping the card, the switch or the button all open the service's own page in Accessibility settings, where the single toggle lives.
@@ -45,7 +45,7 @@ This layer is independent of Protection: it needs **no VPN** and keeps working w
 | An ad is never removed | That build shows no `Hide Ad` button, or the control was renamed | Add the new control name as `hide_control=` in `assets/cosmetic/facebook_rules.txt` and rebuild |
 | Tapping the card does nothing | Builds before 0.2.0 only made the small switch tappable | Update to 0.2.0: the whole card and the **Enable in Accessibility settings** button now open the service page |
 | Tapping the card opens Accessibility, not the Shieldly switch | Android keeps a service's own toggle page system-only (`OPEN_ACCESSIBILITY_DETAILS_SETTINGS` is a signature permission), so no installed app can open it | Under **Downloaded apps** tap **Shieldly sponsored-post hider**. The in-app switch updates when you come back |
-| The same advertiser appears again in a later session | Facebook can serve the same advertiser again; hiding a post is not a block | Nothing to fix — the service hides what is on screen |
+| The same advertiser appears again in a later session | Facebook can serve the same advertiser again; hiding a post is not a block | Nothing to fix: the service hides what is on screen |
 | Ads in Reels/Stories/Marketplace still show | Out of scope by design (labelled feed posts only) | See [LIMITATIONS.md](LIMITATIONS.md) |
 | MIUI kills the hider | Battery optimisation | Autostart **on**, battery saver **No restrictions** for Shieldly |
 
@@ -59,7 +59,7 @@ This is not a bug in the filter. Android tells every app that a VPN is in use, a
 2. Search for the app and tick it.
 3. Tap **Done**. Protection restarts on its own and the tunnel is rebuilt without that app.
 
-The app now leaves through your normal connection and stops seeing a VPN. Ads inside it are no longer filtered — see [LIMITATIONS](LIMITATIONS.md#split-tunnelling-and-the-apps-that-need-it).
+The app now leaves through your normal connection and stops seeing a VPN. Ads inside it are no longer filtered. See [LIMITATIONS](LIMITATIONS.md#split-tunnelling-and-the-apps-that-need-it).
 
 If the bank still refuses, it is detecting something else (root, a modified system, or Play Integrity) and the filter is not the cause.
 
@@ -75,7 +75,7 @@ If the bank still refuses, it is detecting something else (root, a modified syst
 
 | Symptom | Fix |
 |---|---|
-| `gradlew` freezes on a synced folder (OneDrive) | `./gradlew --stop`, delete `app/build`/`core/build`, or move the checkout out of the synced folder — see [BUILDING.md](BUILDING.md) |
+| `gradlew` freezes on a synced folder (OneDrive) | `./gradlew --stop`, delete `app/build`/`core/build`, or move the checkout out of the synced folder, then see [BUILDING.md](BUILDING.md) |
 | Emulator blocks `adb install` (MIUI physical device) | MIUI blocks it by design; install the APK by hand or enable "USB install" in developer options |
 | `settings put` fails over adb | `WRITE_SECURE_SETTINGS` is not granted to shell on MIUI; enable the service in system settings by hand |
 

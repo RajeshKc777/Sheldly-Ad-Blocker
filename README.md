@@ -2,7 +2,7 @@
   <img src="docs/img/logo.png" width="120" alt="Shieldly logo" />
 </p>
 
-<h1 align="center">🛡️ Shieldly — a local DNS ad blocker for Android</h1>
+<h1 align="center">🛡️ Shieldly: a local DNS ad blocker for Android</h1>
 
 <p align="center">
   <a href="https://github.com/RajeshKc777/Sheldly-Ad-Blocker/actions/workflows/android-build.yml">
@@ -23,7 +23,7 @@
 
 **Shieldly** blocks ad and tracker domains **on your device** by running a tiny local VPN that acts as the device's DNS resolver. Every domain your phone looks up is checked against a blocklist; unwanted ones are answered with "this name does not exist", so apps have nothing to connect to.
 
-> **What this is not:** a magic "remove every ad" button. Shieldly filters at the DNS layer. It cannot see inside HTTPS traffic, it cannot remove an ad served from the same domain as the page you are reading, and it cannot defeat apps that bring their own encrypted DNS. Everything it *can and cannot* do is documented below — no overclaims.
+> **What this is not:** a magic "remove every ad" button. Shieldly filters at the DNS layer. It cannot see inside HTTPS traffic, it cannot remove an ad served from the same domain as the page you are reading, and it cannot defeat apps that bring their own encrypted DNS. Everything it *can and cannot* do is documented below, with no overclaims.
 
 > **Current status:** working **debug builds**, 118 unit tests, no published release yet, no Play Store build. See [Project status](#-project-status).
 
@@ -67,12 +67,12 @@
 | 🔴 **Custom block rules** | ✅ Implemented | Add domains the bundled list does not cover |
 | 🔎 **Rule checker** | ✅ Implemented | Type any domain and see exactly which rule would match it |
 | 🌐 **Upstream resolver choice** | ✅ Implemented | Cloudflare, Google, Quad9, AdGuard (plain UDP/53) |
-| 📊 **Live counters** | ✅ Implemented | Lookups, blocked, cache hits, IPv6 observations — all in memory |
-| 🔀 **Per-app bypass (split tunnelling)** | ✅ Implemented | Apps you exclude — banking, payments, anti-cheat — leave through the real network so they never see a VPN; ads inside them are not filtered |
-| 📱 **Facebook sponsored-post hider** | ✅ Experimental | Opt-in AccessibilityService that presses Facebook's own `Hide Ad` button on labelled ad posts, so Facebook removes them — nothing is drawn over the feed |
+| 📊 **Live counters** | ✅ Implemented | Lookups, blocked, cache hits, IPv6 observations, all in memory |
+| 🔀 **Per-app bypass (split tunnelling)** | ✅ Implemented | Apps you exclude (banking, payments, anti-cheat) leave through the real network so they never see a VPN; ads inside them are not filtered |
+| 📱 **Facebook sponsored-post hider** | ✅ Experimental | Opt-in AccessibilityService that presses Facebook's own `Hide Ad` button on labelled ad posts, so Facebook removes them, and nothing is drawn over the feed |
 | 🔄 **Auto-updating blocklists** | 🟡 Library ready, not wired in | HTTPS fetcher + validator exist and are unit-tested; no UI or schedule yet |
 | 🌍 IPv6 DNS filtering | ❌ Not implemented | IPv6 packets are counted, not filtered |
-| 🔐 HTTPS inspection | ❌ Not implemented | Deliberately — see [TLS section](#-http-https-and-tls-explained) |
+| 🔐 HTTPS inspection | ❌ Not implemented | Deliberately so; see [TLS section](#-http-https-and-tls-explained) |
 | 🧭 Browser cosmetic filtering | ❌ Not implemented | No browser is bundled (Phase 8 of the original brief, not started) |
 
 ## 📈 Project status
@@ -91,9 +91,9 @@
 | UI | Jetpack **Compose** (Material 3), single-activity |
 | Async | Kotlin coroutines + a small fixed thread pool for the packet loop |
 | Networking | Raw `java.net` sockets + `java.nio` UDP; **no third-party network SDKs** |
-| Core module | Pure Kotlin JVM module — the filtering and DNS logic is Android-free and unit-tested |
+| Core module | Pure Kotlin JVM module: the filtering and DNS logic is Android-free and unit-tested |
 | Build | Gradle 8.14 (wrapper), AGP 8.13.1, JDK 17 |
-| Tests | JUnit 4 + kotlinx-coroutines-test — **118 tests, 0 failures** |
+| Tests | JUnit 4 + kotlinx-coroutines-test: **118 tests, 0 failures** |
 
 ## 🖼️ Screenshots
 
@@ -109,7 +109,7 @@ The APK is published automatically by the build workflow.
 
 **➡️ [Download the latest release](https://github.com/RajeshKc777/Sheldly-Ad-Blocker/releases/latest)**
 
-Releases are created when a version tag such as `v1.0.0` is pushed — see
+Releases are created when a version tag such as `v1.0.0` is pushed. See
 [`docs/RELEASING.md`](docs/RELEASING.md). Until then, every commit's APK is
 available as a workflow artifact:
 [download from Actions → android-build → Shieldly-debug-apk](https://github.com/RajeshKc777/Sheldly-Ad-Blocker/actions/workflows/android-build.yml).
@@ -136,13 +136,13 @@ available as a workflow artifact:
 | 3 | Dashboard | Tiles show live counters; "Session started" gets a timestamp |
 | 4 | Rules tab | Add your own allow/block rules, or test any domain with the checker |
 | 5 | Settings tab | Choose the upstream resolver; enable the experimental Facebook hider if you want it |
-| 6 | Any time | Toggle protection off — the tunnel closes and all counters reset |
+| 6 | Any time | Toggle protection off: the tunnel closes and all counters reset |
 | 7 | Settings → Facebook sponsored posts | The hider is an accessibility service, not part of the tunnel: it keeps working with Protection **off**. It and the per-app bypass are independent of each other |
 
 Two independent layers, and either can run without the other:
 
-- **Protection (VPN)** — answers DNS for the whole device and refuses ad, tracker and malware domains. Needs the VPN consent and the dashboard switch.
-- **Facebook sponsored-post hider** — an accessibility service that presses Facebook's own `Hide Ad` button. Facebook only, and it needs **no VPN**.
+- **Protection (VPN)**: answers DNS for the whole device and refuses ad, tracker and malware domains. Needs the VPN consent and the dashboard switch.
+- **Facebook sponsored-post hider**: an accessibility service that presses Facebook's own `Hide Ad` button. Facebook only, and it needs **no VPN**.
 
 Protection cannot hide Facebook sponsored posts by itself: they are served from `facebook.com`, and blocking that host would break the app. That is exactly why the hider exists.
 
@@ -152,14 +152,14 @@ Turning protection off (or uninstalling the app) immediately releases the VPN, s
 
 Two Gradle modules:
 
-- **`:app`** — Android layer: Compose UI, `VpnService`, the packet reader/writer, the accessibility service, storage.
-- **`:core`** — pure Kotlin (no Android SDK): rule parsing, domain matching, the DNS pipeline, cache, upstream resolver, UDP packet encoding. This is the part covered by unit tests.
+- **`:app`**: Android layer: Compose UI, `VpnService`, the packet reader/writer, the accessibility service, storage.
+- **`:core`**: pure Kotlin (no Android SDK): rule parsing, domain matching, the DNS pipeline, cache, upstream resolver, UDP packet encoding. This is the part covered by unit tests.
 
 ### High-level system architecture
 
 ```mermaid
 flowchart TB
-    subgraph UI["📱 Android UI — app module"]
+    subgraph UI["📱 Android UI: app module"]
         A1["MainActivity + Compose screens<br/>(Dashboard · Rules · Stats · Settings)"]
         A2["SentinelViewModel"]
         A3["ProtectionState<br/>(shared status + counters)"]
@@ -170,13 +170,13 @@ flowchart TB
         C2["AdBlockVpnService<br/>(foreground service, notification)"]
     end
 
-    subgraph TUN["🕳️ Tunnel — one thread per session"]
+    subgraph TUN["🕳️ Tunnel: one thread per session"]
         T1["TUN reader thread"]
         T2["Ipv4Udp parser / builder"]
         T3["Worker pool (2–8 threads)"]
     end
 
-    subgraph CORE["🧠 :core — pure Kotlin, unit-tested"]
+    subgraph CORE["🧠 :core module: pure Kotlin, unit-tested"]
         F1["DomainFilter + DomainMatcher<br/>(allow rules win)"]
         F2["RuleParser · BlocklistRepository<br/>(atomic snapshot swap)"]
         P1["DnsPipeline"]
@@ -259,7 +259,7 @@ flowchart TD
     PIPE -->|"unblocked"| UPSTREAM --> INTERNET
     PIPE -->|"blocked: NXDOMAIN"| DNSQ
     READER -->|"IPv6 datagram observed"| COUNT["Counted, then dropped<br/>(never expected in this tunnel)"]
-    READER -->|"non-DNS port"| SKIP["Ignored — not forwarded<br/>(nothing else should arrive)"]
+    READER -->|"non-DNS port"| SKIP["Ignored, not forwarded<br/>(nothing else should arrive)"]
 ```
 
 The three decisions that define this design:
@@ -274,8 +274,8 @@ The full architecture walk-through, including the blocklist update sequence, the
 
 Per query, in order:
 
-1. **Parse** — the raw UDP payload is parsed; unparseable garbage is dropped (the client retries).
-2. **Evaluate the question name** — `DomainFilter` checks the domain:
+1. **Parse**: the raw UDP payload is parsed; unparseable garbage is dropped (the client retries).
+2. **Evaluate the question name**: `DomainFilter` checks the domain:
    - **allow rules first** (yours beat everything, including all subdomains),
    - then **deny rules** (yours),
    - then **the bundled blocklist**,
@@ -285,27 +285,27 @@ Per query, in order:
 5. **Cache miss** → forwarded over a `protect()`ed UDP socket to your chosen upstream resolver, cached with the minimum answer TTL, and replied.
 6. **Upstream failure** → `SERVFAIL` reply so the app gets a clean, normal DNS error instead of a hang.
 
-Every step's counters are shown on the **Stats** tab. A blocked lookup is a DNS name answered with NXDOMAIN — it is **not** a count of advertisements removed.
+Every step's counters are shown on the **Stats** tab. A blocked lookup is a DNS name answered with NXDOMAIN, and it is **not** a count of advertisements removed.
 
 ## 🌱 DNS filtering for beginners
 
 **What is DNS?** When any app wants to contact `ads.example.com`, Android first asks a DNS server: *"what is the IP address of ads.example.com?"*. That lookup is the internet's phone book.
 
-**What does Shieldly do?** It becomes your phone's phone book. If a number is on your "do not call" list, Shieldly answers *"no such person"* (`NXDOMAIN`). The app that asked gets "address not found" and cannot open a connection. If the domain is fine, Shieldly quietly asks a real DNS server (Cloudflare, Google, Quad9 or AdGuard — your choice) and forwards the answer.
+**What does Shieldly do?** It becomes your phone's phone book. If a number is on your "do not call" list, Shieldly answers *"no such person"* (`NXDOMAIN`). The app that asked gets "address not found" and cannot open a connection. If the domain is fine, Shieldly quietly asks a real DNS server (Cloudflare, Google, Quad9 or AdGuard, your choice) and forwards the answer.
 
 **Why block at DNS level?**
 
 - It works for **every app on the phone**, not just a browser.
-- It is cheap — no content is inspected, just one name per lookup.
-- It is honest — the app either cannot resolve the name at all, or resolves it normally.
+- It is cheap: no content is inspected, just one name per lookup.
+- It is honest: the app either cannot resolve the name at all, or resolves it normally.
 
-**What it cannot do:** if an app loads its ads from `cdn.somesite.com` — the very same domain as the page content you asked for — DNS cannot separate "the ad part" from "the article part". DNS only knows names, never URLs, paths, or page content.
+**What it cannot do:** if an app loads its ads from `cdn.somesite.com`, the very same domain as the page content you asked for, and DNS cannot separate "the ad part" from "the article part". DNS only knows names, never URLs, paths, or page content.
 
 ## 🔒 HTTP, HTTPS and TLS explained
 
 - **HTTP filtering:** there is none, by design. Shieldly never receives HTTP traffic (only DNS names on UDP/53 enter the tunnel), so it never has to make that decision.
-- **HTTPS filtering:** to inspect HTTPS, an app would have to impersonate websites with a custom certificate authority that the phone is forced to trust — and modern apps use **certificate pinning**, which rejects it. Shieldly does **not** install certificates and does **not** decrypt HTTPS. Nothing in this repository can read your TLS traffic.
-- **TLS in one sentence:** HTTPS encrypts the *content* of your requests. The *domain name you visited* is still visible to the DNS layer (unless the app uses encrypted DNS), which is exactly the lever Shieldly uses — and why the lever stops at the DNS layer.
+- **HTTPS filtering:** to inspect HTTPS, an app would have to impersonate websites with a custom certificate authority that the phone is forced to trust, and modern apps use **certificate pinning**, which rejects it. Shieldly does **not** install certificates and does **not** decrypt HTTPS. Nothing in this repository can read your TLS traffic.
+- **TLS in one sentence:** HTTPS encrypts the *content* of your requests. The *domain name you visited* is still visible to the DNS layer (unless the app uses encrypted DNS), which is exactly the lever Shieldly uses, and why the lever stops at the DNS layer.
 
 | Technique | What it inspects | Shieldly |
 |---|---|---|
@@ -316,14 +316,14 @@ Every step's counters are shown on the **Stats** tab. A blocked lookup is a DNS 
 
 ## 📜 Blocklist management
 
-- **Source:** `app/src/main/assets/blocklist/test-blocklist.txt` — a deliberately **small starter list (49 rules)**, not EasyList. It proves the pipeline end-to-end and keeps false positives near zero.
+- **Source:** `app/src/main/assets/blocklist/test-blocklist.txt`, a deliberately **small starter list (49 rules)**, not EasyList. It proves the pipeline end-to-end and keeps false positives near zero.
 - **Format:** standard hosts/Adblock-domain syntax (`||domain^`, `domain`, `0.0.0.0 domain`), `!` and `#` comments. See [`docs/BLOCKLISTS.md`](docs/BLOCKLISTS.md).
-- **Updates:** `core/…/BlocklistUpdater.kt` implements an **HTTPS-only** downloader (redirects are re-checked so a `https→http` downgrade is rejected) with size/line/rule-ratio validation, and unit tests. **The app does not call it yet** — there is no UI, no schedule, no storage for downloaded lists. Until that lands, the list changes only with an app update.
+- **Updates:** `core/…/BlocklistUpdater.kt` implements an **HTTPS-only** downloader (redirects are re-checked so a `https→http` downgrade is rejected) with size/line/rule-ratio validation, and unit tests. **The app does not call it yet**: there is no UI, no schedule, no storage for downloaded lists. Until that lands, the list changes only with an app update.
 - **Your rules** live in `SharedPreferences` and are applied on every rebuild; a broken edit cannot take down the working list because the snapshot is swapped atomically only after a successful rebuild.
 
 ## 🧭 Browser-level filtering
 
-**Not implemented.** There is no bundled browser. The original requirement's Phase 8 ("browser with content filtering") was never started, and nothing in the README pretends otherwise. The experimental **Facebook sponsored-post hider** is the closest implemented feature: an AccessibilityService that hides posts Facebook itself labels as ads by pressing Facebook's own `Hide Ad` button, which makes Facebook remove the post — scoped to `com.facebook.katana` and `com.facebook.lite` only, off by default, and documented with its limits in [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md).
+**Not implemented.** There is no bundled browser. The original requirement's Phase 8 ("browser with content filtering") was never started, and nothing in the README pretends otherwise. The experimental **Facebook sponsored-post hider** is the closest implemented feature: an AccessibilityService that hides posts Facebook itself labels as ads by pressing Facebook's own `Hide Ad` button, which makes Facebook remove the post, scoped to `com.facebook.katana` and `com.facebook.lite` only, off by default, and documented with its limits in [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md).
 
 ## 🛡️ Privacy and security
 
@@ -336,7 +336,7 @@ Every step's counters are shown on the **Stats** tab. A blocked lookup is a DNS 
 ## 🔋 Performance and battery
 
 - The DNS hot path is a single parse + a hash lookup (or a `protect()`ed UDP exchange upstream). It is measured in microseconds of CPU per query.
-- The tunnel only receives packets for **one /32 route** — your phone's other traffic does not transit this process at all.
+- The tunnel only receives packets for **one /32 route**; your phone's other traffic does not transit this process at all.
 - One low-priority notification while running. No wake-locks, no polling.
 - Battery impact is expected to be indistinguishable from idle, but this is **not yet formally measured** across devices (measured only by hand on one device).
 - The Facebook hider walks the accessibility tree on feed changes; it debounces and backs off when a scan is slow or battery saver is on. It runs only while Facebook is in the foreground.
@@ -347,17 +347,17 @@ The short list; the long list with evidence lives in [`docs/LIMITATIONS.md`](doc
 
 | Limitation | Practical effect |
 |---|---|
-| Same-domain ads (`cdn.site.com` serves page + ads) | Cannot be separated — DNS knows names, not page parts |
+| Same-domain ads (`cdn.site.com` serves page + ads) | Cannot be separated: DNS knows names, not page parts |
 | Apps with hard-coded DNS or **DoH/DoT** (browsers, private DNS in Android settings) | Their lookups bypass the filter entirely |
 | IPv6 DNS | Counted, not filtered |
 | QUIC / HTTP-3 | Not DNS; never touches the tunnel |
 | Ad-URL style blocking (`/ad.png` on a shared CDN) | Not possible without content inspection |
-| YouTube, Instagram, Facebook Lite, Reels/video ads | Not removed by DNS; the hider only handles labelled feed posts in the main Facebook app — Facebook Lite exposes no text to accessibility, so nothing can be detected there |
-| Banking/sensitive apps | Should work normally (only DNS names are seen) — if one misbehaves, add an allow rule |
+| YouTube, Instagram, Facebook Lite, Reels/video ads | Not removed by DNS; the hider only handles labelled feed posts in the main Facebook app; Facebook Lite exposes no text to accessibility, so nothing can be detected there |
+| Banking/sensitive apps | Should work normally (only DNS names are seen), so if one misbehaves, add an allow rule |
 | Two VPN apps | Android allows one at a time; enabling another **revokes** Shieldly's tunnel |
 | Play Store policy | Accessibility-based UI modification is high-risk; this build is **not** published on Play |
 | Sideloading warnings | Android shows "unknown apps" / "restricted settings" prompts; normal for APK installs outside Play |
-| Release signing | Not configured in CI yet — distributed APK is debug-signed |
+| Release signing | Not configured in CI yet; the distributed APK is debug-signed |
 
 ## 🧯 Troubleshooting
 
@@ -370,7 +370,7 @@ The short list; the long list with evidence lives in [`docs/LIMITATIONS.md`](doc
 | Status stuck on *Starting…* | Blocklist rebuild still running (first start) | Wait a few seconds; a cold rebuild is one-time |
 | Facebook hider silently stops working | Facebook changed its label/layout | Nothing to fix at runtime; check [Limitations](docs/LIMITATIONS.md) |
 
-**Emergency escape hatch:** turn protection **off** on the Dashboard, or simply uninstall the app — the tunnel disappears immediately with it.
+**Emergency escape hatch:** turn protection **off** on the Dashboard, or simply uninstall the app: the tunnel disappears immediately with it.
 
 ## 🛠️ Development
 
@@ -387,7 +387,7 @@ cd Sheldly-Ad-Blocker
 
 ## 🤝 Contributing
 
-PRs are welcome. Please read [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) first — the short version: keep the **`:core`** module Android-free and unit-tested, never claim a capability the code does not have, and never add a network dependency for the DNS hot path.
+PRs are welcome. Please read [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) first. The short version: keep the **`:core`** module Android-free and unit-tested, never claim a capability the code does not have, and never add a network dependency for the DNS hot path.
 
 ## 🐛 Security policy
 
@@ -395,7 +395,7 @@ Found a vulnerability (e.g. a way to make the filter leak or crash)? Please use 
 
 ## 🗺️ Roadmap
 
-1. **Wire in the blocklist updater** — UI + schedule + storage for downloaded lists (library already tested).
+1. **Wire in the blocklist updater**: UI + schedule + storage for downloaded lists (library already tested).
 2. **Release signing in CI** and a signed `v1.0.0` release APK.
 3. **IPv6 support** (route `::/128`-style DNS) and DoH upstream option.
 4. **Per-app filtering** (route lists).
@@ -403,7 +403,7 @@ Found a vulnerability (e.g. a way to make the filter leak or crash)? Please use 
 
 ## 📄 License
 
-Apache License 2.0 — permissive, with an explicit **patent grant** that fits a network-filtering tool, and compatible with the AndroidX/Compose dependencies used here. Full text: [`LICENSE`](LICENSE).
+Apache License 2.0: permissive, with an explicit **patent grant** that fits a network-filtering tool, and compatible with the AndroidX/Compose dependencies used here. Full text: [`LICENSE`](LICENSE).
 
 ## 👤 Developed by
 
@@ -415,7 +415,7 @@ Apache License 2.0 — permissive, with an explicit **patent grant** that fits a
 
 ## 🙏 Acknowledgements
 
-- [Android `VpnService`](https://developer.android.com/reference/android/net/VpnService) — the platform API the tunnel stands on.
-- [Jetpack Compose](https://developer.android.com/jetpack/compose) and [Material 3](https://m3.material.io/) — UI toolkit.
-- [DNS RFC 1035](https://www.rfc-editor.org/rfc/rfc1035) — the wire format `core/dns` implements.
-- Public blocklist ecosystem (hosts/Adblock domain syntax) — the starter list uses the same syntax so bigger lists can be imported once the updater is wired in.
+- [Android `VpnService`](https://developer.android.com/reference/android/net/VpnService): the platform API the tunnel stands on.
+- [Jetpack Compose](https://developer.android.com/jetpack/compose) and [Material 3](https://m3.material.io/): UI toolkit.
+- [DNS RFC 1035](https://www.rfc-editor.org/rfc/rfc1035): the wire format `core/dns` implements.
+- Public blocklist ecosystem (hosts/Adblock domain syntax): the starter list uses the same syntax so bigger lists can be imported once the updater is wired in.

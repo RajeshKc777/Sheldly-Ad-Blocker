@@ -24,7 +24,7 @@ import java.util.concurrent.Executors
  * and presses it. That is the only control this app ever presses: the button
  * exists only on a sponsored post, so finding it is itself proof that the post
  * is an ad. Facebook then removes the post and reflows the feed, so nothing is
- * left behind — no blank block, no overlay, no trace.
+ * left behind: no blank block, no overlay, no trace.
  *
  * Two paths, same action:
  *
@@ -123,7 +123,7 @@ class FacebookAdHiderService : AccessibilityService() {
 
         // Fast path: the node that just changed usually contains the post that
         // appeared, including Facebook's own "Hide Ad" button. Pressing it here
-        // skips the debounce entirely — that wait is what made the ad visible
+        // skips the debounce entirely, because that wait is what made the ad visible
         // long enough to read.
         if (type == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED ||
             type == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED

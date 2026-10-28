@@ -69,8 +69,8 @@ fun SettingsScreen(
                     modifier = Modifier.padding(top = 8.dp),
                 )
                 Text(
-                    text = "Apps that refuse to run behind a VPN — banking, wallets — can " +
-                        "be excluded further down. Their traffic then leaves unfiltered.",
+                    text = "Apps that refuse to run behind a VPN, such as banking and wallet apps, " +
+                        "can be excluded further down. Their traffic then leaves unfiltered.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp),
@@ -136,7 +136,7 @@ fun SettingsScreen(
                 Text(
                     text = "Banking and payment apps often refuse to run while a VPN " +
                         "is active. Apps excluded here send their traffic straight out " +
-                        "through your normal connection, so they never see a VPN — and " +
+                        "through your normal connection, so they never see a VPN, and " +
                         "their own ads are not filtered either. Protection restarts " +
                         "automatically when you change this list.",
                     style = MaterialTheme.typography.bodyMedium,
@@ -157,16 +157,18 @@ fun SettingsScreen(
 
         item {
             SectionCard(title = "Privacy") {
-                Text(
-                    text = "• Lookup counters and the recent-blocked list live in memory " +
-                        "only. They are cleared when protection restarts.\n" +
-                        "• Nothing is written to disk except your own allow/block rules " +
-                        "and the resolver choice.\n" +
-                        "• No analytics, no crash reporting, no account, no ads.\n" +
-                        "• The app has no server of its own. DNS traffic goes straight to " +
-                        "the resolver above.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                PrivacyLine(
+                    "Lookup counters and the recent-blocked list live in memory only, " +
+                        "and are cleared when protection restarts.",
+                )
+                PrivacyLine(
+                    "Nothing is written to disk except your own allow and block rules " +
+                        "and the resolver choice.",
+                )
+                PrivacyLine("No analytics, no crash reporting, no account, no ads.")
+                PrivacyLine(
+                    "The app has no server of its own: DNS traffic goes straight to the " +
+                        "resolver above.",
                 )
             }
         }
@@ -242,4 +244,15 @@ fun SettingsScreen(
             onApply = onExcludedApps,
         )
     }
+}
+
+/** One sentence in the Privacy card. Plain text, no bullet glyphs. */
+@Composable
+private fun PrivacyLine(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 6.dp),
+    )
 }

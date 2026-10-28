@@ -144,7 +144,7 @@ fun DashboardScreen(
                 KeyValueRow("Exception rules", blocklist.allowRuleCount.grouped())
                 KeyValueRow(
                     "Session started",
-                    if (status.sinceMillis > 0L) formatTime(status.sinceMillis) else "–",
+                    if (status.sinceMillis > 0L) formatTime(status.sinceMillis) else "not running",
                 )
             }
         }

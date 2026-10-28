@@ -23,7 +23,7 @@ Everything below is written to make those three checkable.
 | Ads hidden on screen (count) | memory (`CosmeticStatistics`) | until service stops | no |
 | User allow/deny rules | `SharedPreferences` | until uninstalled | no |
 | Upstream resolver choice | `SharedPreferences` | until uninstalled | no |
-| Screen text from Facebook | never persisted, never logged | — | no |
+| Screen text from Facebook | never persisted, never logged | none | no |
 
 The app has `INTERNET` only because the VPN forwards DNS packets. The cosmetic
 service performs no network I/O at all.
@@ -58,8 +58,8 @@ so a widened manifest cannot silently widen behaviour without a code change.
 
 ### Capabilities requested
 
-- `canRetrieveWindowContent="true"` — required; the ad label is text.
-- `typeWindowStateChanged`, `typeWindowContentChanged`, `typeViewScrolled` — the
+- `canRetrieveWindowContent="true"`, which is required because the ad label is text.
+- `typeWindowStateChanged`, `typeWindowContentChanged`, `typeViewScrolled`: the
   minimum needed to know when the feed changed or moved.
 
 Not requested: `canPerformGestures`, `canRequestFilterKeyEvents`,
@@ -68,7 +68,7 @@ or any text-selection capability. The service cannot synthesise touch gestures
 (that needs `canPerformGestures`), scroll, type, or capture the screen.
 
 The one action it can dispatch is the platform accessibility action
-`ACTION_CLICK` on a node whose label matches `hide_control` in the rules file —
+`ACTION_CLICK` on a node whose label matches `hide_control` in the rules file,
 in practice the `Hide Ad` button Facebook renders on a sponsored post. It is
 pressed only when the post has already been matched by its ad label, only when
 the button sits inside that post's rectangle, and at most once per post. Because
@@ -127,15 +127,15 @@ These are not "not yet implemented"; they are out of scope by design:
 
 ## Reviewer checklist
 
-1. `AndroidManifest.xml` — only `INTERNET`, `FOREGROUND_SERVICE`,
+1. `AndroidManifest.xml`: only `INTERNET`, `FOREGROUND_SERVICE`,
    `FOREGROUND_SERVICE_SPECIAL_USE`, `POST_NOTIFICATIONS`, plus the
    accessibility binding permission on the service.
-2. `accessibility_service_config.xml` — package list is exactly the two Facebook
+2. `accessibility_service_config.xml`: the package list is exactly the two Facebook
    packages; no gesture or screenshot capability.
-3. `FacebookAdHiderService` — no `Log.*` of node text; no network calls.
-4. `CosmeticStatistics` — keys contain a label and a rectangle only.
-5. `AdBlockVpnService` — routes one address; `protect()` on upstream sockets.
-6. `gradle/libs.versions.toml` — no analytics, crash-reporting, or ad SDKs.
+3. `FacebookAdHiderService`: no `Log.*` of node text; no network calls.
+4. `CosmeticStatistics`: keys contain a label and a rectangle only.
+5. `AdBlockVpnService`: routes one address; `protect()` on upstream sockets.
+6. `gradle/libs.versions.toml`: no analytics, crash-reporting, or ad SDKs.
 
 ## Reporting a vulnerability
 
@@ -144,5 +144,5 @@ rather than a public issue. Include the Android version, the affected component
 (VPN service, cosmetic service, UI), and steps or a patch. Please do not attach
 keystores, passwords, or personal data to the report.
 
-There is no paid bounty and no guaranteed response time — this is a small
-open-source project — but reports are read and fixes are prioritised by severity.
+There is no paid bounty and no guaranteed response time; this is a small
+open-source project, but reports are read and fixes are prioritised by severity.
